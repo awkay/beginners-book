@@ -1,0 +1,440 @@
+= Introduction to Programming
+:author: Tony Kay
+:lang: en
+:encoding: UTF-8
+:doctype: book
+:source-highlighter: coderay
+:source-language: clojure
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectanchors:
+:leveloffset: 1
+:sectnums:
+:imagesdir: assets/img
+:scriptsdir: js
+:imagesoutdir: docs/assets/img
+:favicon: assets/favicon.ico
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+ifdef::env-github[]
+toc::[]
+endif::[]
+
+= Thinking About Information
+
+== Without Computers
+
+In normal everyday life there are lots of ways we represent information that do not involve computers. We use
+paper, ink, film, photographic paper, sticks and sand, etc. The information can be small and transient
+(a heart drawn on a sandy beach with a stick) or quite large with an emphasis on access and permanence
+(The Library of Congress).  We might also be concerned with the physical space required for that information. The
+use of microfilm which predated the common availability of computers was very often used to store things like
+old newspapers, for example.
+
+We humans choose the representation of this information based on many factors:
+space, speed of access, permanence.
+
+* A dictionary is sorted so that you can predictably skip huge swaths of words to get to what you want.
+* Libraries order their books and provide a catalogue to optimize search AND minimize walking.
+* Newpapers were put on microfilm to dramatically reduce storage required.
+
+In the pre-digital world it is very easy to conceptualize all of these things because we can see the physical objects:
+A dictionary, a library, a stick being used on a sandy beach.
+
+== With Computers
+
+As we moved into the digital realm, we needed to invent ways to represent this same information there.
+This brave new world requires a big shift, because digital computers primarily deal with numbers. So, the
+field of computer science is largely a field of applied mathematics where we search for ways to represent
+real-world information as numbers. There are probably *many* more ways to encode data as numbers as
+there are to encode them physically.
+
+Fortunately, the same basic concerns exist in the digital realm:
+
+* Space: We've all probably filled up a hard drive.
+** Compression: (paper vs microfilm)
+* Speed of Access
+* Permanence (power on, power off)
+
+When learning about information representation in computers, we're largely learning just a few things:
+
+* What low-level ways can the computer actually represent the information?
+** This is usually just some encoding from a easy-to-use human form to a numeric form.
+** Programming languages usually have features that were developed to make that conversion easier for programmers to do.
+* What creative ways can we use to organize the information for fast or convenient access?
+** Algorithms: a process or set of rules to be followed in calculations or other problem-solving operations
+such as data encoding/decoding.
+* Permanence: Once we have the numbers, where do we keep them? Can we make them smaller?
+
+Obviously, at this point and time we have gone far beyond requiring you the programmer from looking
+at the low-level numbers in the computer itself. Modern programming languages do a lot to make
+the basic data representation easy.
+
+QUIZ::
+What are the common desires that we hope to meet in both the old-world representation and the digital representation?
+
+== Common Basic Data
+
+All digital computers end up doing about the same thing. There are, however, hundreds of programming languages
+in use today that are targeted at making particular tasks easy for a subset of the population.
+
+For example, a spreadsheet is actually a kind of programming language (just the ability to have cells based on the
+values of other cells with formulas). This language is quite useful to all sorts of people.
+
+The BASIC programming language was invented as something beginners could easily write simple things in.
+
+These languages are all trying to do one basic thing: Take text that *you* write and turn it into something the
+computer can understand. These programming languages are themselves inventions of people before you
+and themselves are programs whose one job is to translate one language into the language of the computer.
+
+As such, all of these language have invented things that you type that can be turned into raw data for
+the computer.
+
+We'll cover a few of those here.
+
+QUIZ::
+Since different programming languages have different things you might "type" in order to represent data, do
+you imagine that many of these languages would share some commonalities? Name some that you would expect to
+be close or identical in many programming languages.
+
+=== Integers
+
+Whole (signed) numbers are usually just typed as-is: 4 means 4.
+
+Computers actually store integers using binary, which means the low-level representation uses
+math based on powers of two. Because of this we sometimes use alternative ways of typing them
+into a programming language. The base-10 numbers are always written as normal numbers.
+
+Sometimes we switch to using base-16, sometimes called hexidecimal, or just hex. There
+are two reasons for this: It is shorter to type, and we can more easily convert the number to the
+underlying bit pattern because each digit of a hex number represents 4 bits.  The letter `A` is used
+for the "extra" digit `10`, `B` = `11`, up to `F` = 15 (for a total of 16 possibilities per digit).
+
+If you were trying to write down a number that matched a particular "bit pattern" in computer memory
+you might want to do the conversion like this:
+
+|===
+| Binary| 0101  | 1010  | 0111
+| Hex |    5    | A     |    7
+|===
+
+We usually write hex in programming languages by prefixing the digits with `0x`. So in this example, the
+hex number is typed into the computer as `0x5A7`. If you use a programmer's calculator you can convert this
+to decimal.
+
+QUIZ::
+What is 0x5A7 in decimal?
+
+BONUS::
+Octal (only using digits 0 to 7) happens to align on 3-bit boundaries. In programming languages octal
+can usually be typed in by prefixing the number with `0`. For example, `013` is an octal number in
+many languages, NOT a decimal. Convert the bit pattern from the example in this section into octal.
+
+=== Decimal Numbers
+
+Numbers that have a decimal point have to be stored using a different bit pattern than integers. We won't
+cover the details of that here, but most programming languages support two different "sizes" of decimal
+numbers. The term used for these is usually "floating point number" ("float" for short) and
+"double precision floating point number" ("double" for short).
+
+How standard floating point numbers are stored and work in computers is defined by an IEEE-754 standard.
+Any language you are likely to work in is running on a computer that uses this standard, though
+there can be some variance as your platform gets exotic.
+
+Programming languages usually define "float" as a 32-bit version, which can store numbers with
+7 digits of precision, and can slide the decimal place left/right about 38 places. A "double" uses
+64 bits, and has 15 digits of precision, and can slide the decimal place roughly 308 places (i.e.
+the biggest number is about stem:[10^308])
+
+A suffix is often supported in programming languages when typing a number if you wish to clarify
+the representation you want.
+
+|====
+|Language| What you type| What you get
+| Clojure | 3.5 | double
+| Clojure | (float 3.5) | float
+| Java | 3.5  | double
+| Java | 3.5f  | float
+| Javascript | 3.5  | double (no way to get float)
+|====
+
+=== Characters
+
+A character is a glyph (usually appearing on, or producible by a keyboard) that has some human meaning. The
+early American computers could only support the characters used in North America. The ASCII standard was
+the first mapping from human glyphs (like the capital letter A) to numbers (65).
+
+|===
+|Language | What you'd type
+|C |'A' |
+|C++ |'A'
+|Clojure | \A
+|ClojureScript | \A
+|Java |'A'
+|Javascript | No direct way to type in a single character (see strings)
+|===
+
+as you can see many languages have overlap in how you'd represent a single glyph.
+
+ASCII is just one *encoding* (glyph to number). Today most modern languages are meant to be used internationally.
+Unfortunately, until a standard was reached globally, every country in the world invented their own encoding. This
+was a real mess for a while. You can go look at these older (and still supported) encodings, such as
+the one that was used for https://en.wikipedia.org/wiki/ISO/IEC_8859-7[greek].
+
+Most programmers today use Unicode. For space constraints most Unicode is stored as UTF-8, which just means that
+each glyph you type uses at least 8 bits (one byte) but can use more bytes if needed. Chinese has many thousands of glyphs,
+so to truly represent every possible glyph may require a few bytes. UTF-8 is an example of two things: the encoding of
+information, and also the *compression* of that information.  UTF-8 takes no more space than ASCII if you only use
+plain English, but if you use Chinese it automatically uses the additional space needed store the larger
+numbers that those glyphs encode to.
+
+For example, in UTF-8, an 'A' is still the number 65 (a single byte), but the greek letter π is stored as
+two bytes holding the numbers 207, followed by 128.
+
+QUIZ:: Type "UTF for π" into google search. It should show you the UTF-8, 16, and 32 values. Do you notice anything odd
+between those? What? If you see something odd, can you explain it?
+
+BONUS::
+What is the decimal number used in UTF-8 (and ASCII) for the lower-case letter `a`? What's the numerical difference
+between `A` and `a`? Think about that in binary: How might that be significant?
+
+=== Strings
+
+The word "string" in computing is playing on the idea of "stringing things together". Basically a string in
+a computer is simply a linear sequence of characters, which either starts with a "length", or ends with a
+special termination value (usually called NUL, which is almost always the number 0).
+
+So, the string that contains three `A`'s in a row would be stored in the computer either as the length
+followed by the character codes:
+
+|====
+|  3     |  65  |  65  |  65
+|====
+
+or more commonly as the characters with a NUL termination:
+
+|====
+|  65  |  65  |  65 | 0
+|====
+
+You will often hear the latter called "null-terminated strings". You will often hear or see this idea
+discussed using the terms/symbols null, NUL, ø.
+
+NOTE: There are, of course, more ways of storing strings in computers.
+
+As far as what *you* type in the programming language, it is usually the sequence of glyphs surrounded by
+`"`. E.g. "Hello world" is typically a null-terminated string containing those character codes.
+
+All programming languages have a way to treat a string as a sequence of some sort. In other words, you can
+usually access the individual characters, or grab a range of them.
+
+|====
+| Language | What you type |What you get
+| C | "Hello world" | An ASCII encoded, null-terminated string
+| Java/Clojure | "Hello world" | A UTF-8 encoded, null-terminated string
+| Javascript | "Hello world" | A UTF-16 (!!!), null-terminated string
+| Javascript | 'Hello world' | A UTF-16 (!!!), null-terminated string
+|====
+
+Note that in Javascript there are *two* ways to get a string. That language expects there to be the need
+to often embed quotes within quotes, so it was deemed convenient to be able to type `"he's over there"`
+or `'"Hello", she said.'`
+
+Anytime you need to embed the "start quote" character within a string, most langauges simply have you
+prefix it with `\`. For example, in Java or Clojure you'd type `"\"Hello\", she said"` to get a string
+that also includes the literal character `"`.
+
+QUIZ::
+We know that in Java/Clojure `"AA"` is represented in memory as the null-terminated string of numbers 65, 65, 0.
+What would be the sequence of in-memory numbers for the string `"A π"`? Hint: Remember to look up the encoding for
+the space!
+
+QUIZ::
+In Clojure what would you type in to make a literal string out of:
+`Javascript uses both ' and " to surround strings`.
+
+BONUS::
+Can you guess why strings are usually stored with NUL termination instead of a prefix length? What
+do you think are the advantages/disadvantages of these two ways of storing strings?
+
+==== Special Characters in Strings
+
+Strings are one of the most commonly-used things in programming, so it pays to know a little more about them.
+In *most* programming languages you *cannot* put a line break inside of the string. For example, this is an
+error in Java, Javascript, C, C++, and most other languages:
+
+[source,java]
+-----
+"This is a test
+ Hello!"
+-----
+
+NOTE: Clojure and Clojurescript are *ok* with putting a literal new line in a string like that.
+
+Instead, most programming languages define a way in which you can embed control characters in a more visible way. The
+method of doing this is *just* like the method for embedding a quote within quotes: use a `\`. The most common
+special embedded things are: `\n` (newline), `\r` (Windows, carriage return, old typewriter garbage), `\t` TAB. In
+many programming languages the special `\u0000` means to use a literal unicode value (e.g. π can be typed into
+a string as "\u03A0" in Java and Clojure).
+
+So, in Java you'd change the broken example above to:
+
+[source,java]
+-----
+"This is a test\n Hello!"
+-----
+
+QUIZ::
+What would you type into Java in order to get the words "Happy Birthday Sally" on three different lines? It turns out
+this answer is slightly different on Windows vs. everything else (OSX, Linux, UNIX). What is it on Windows?
+
+=== Arrays
+
+Arrays are exactly like strings (they are a sequence of things that are adjacent
+in the computer's memory), except they are something besides characters.
+
+Technically an array is: A fixed-length sequence of equal-sized entries, laid out
+so the values are adjacent and sequential in computer memory.
+
+Making an array varies by language. For example, to create an array of floats called `arr`:
+
+|=====
+| Language | Make a new array called `arr`
+| Java | float arr[] = new float[3];
+| Javascript | var arr = new Float32Array(3);
+| Clojure | (def arr (float-array 3))
+|=====
+
+which results in this in the computer's memory:
+
+[ditaa,target=arr1]
+-----
+offset +---------+
+    0  | float   |
+       +---------+
+    1  | float   |
+       +---------+
+    2  | float   |
+       +---------+
+-----
+
+Where the numbers to the left of each box are the *offset* of a given entry.
+Programming languages will give you a way to read/write the cells of an array
+by this "abstract offset".
+
+For example:
+
+|=====
+| Language | Get an element from an array | Set an element of an array
+|  C          | b = arr[1]     | arr[1] = 3.4f
+|  Java       | b = arr[1]     | arr[1] = 3.4f
+|  Javascript | b = arr[1]     | arr[1] = 3.4f
+|  Clojure    | (aget arr 1)   | (aset arr 1 3.4f)
+|=====
+
+and after the set operation (e.g. `arr[1] = 3.4f`) we'll have this:
+
+[ditaa, target=arr2]
+-----
+offset +---------+
+    0  | ???     |
+       +---------+
+    1  | 3.4     |
+       +---------+
+    2  | ???     |
+       +---------+
+-----
+
+To advance your understanding, note that each byte
+of computer's memory is actually "indexed" by its relative location in the computer chip. So, if
+you have 1GB of memory (1 billion bytes), then by definition you have a byte with address 0,
+a byte with address 1, 2, 3, ..., 1 billion.
+
+When you create an array, you're asking the programming language to find a block of this memory that
+is not currently in use, and then you're asking it to produce the correct instructions to read/write
+the data in that block. So, say our computer had some free space at address 1024, then
+our array of floats actually looks something like this in memory:
+
+[ditaa, target=arrdetail]
+-----
+            the bit pattern of floats is "4 bytes wide"
+address   +---------+ +---------+ +---------+ +---------+
+     1024 | 11010101| | 01001011| | 11001111| | 11010110|
+          +---------+ +---------+ +---------+ +---------+
+
+          +---------+ +---------+ +---------+ +---------+
+     1028 | 11010101| | 01001011| | 11001111| | 11010110|
+          +---------+ +---------+ +---------+ +---------+
+
+          +---------+ +---------+ +---------+ +---------+
+     1032 | 11010101| | 01001011| | 11001111| | 11010110|
+          +---------+ +---------+ +---------+ +---------+
+-----
+
+
+The idea of a linear sequence of the "same kind of" things in the computer's memory is
+actually quite useful for a few reasons:
+
+. It allows you to store more than one thing as a "group"
+. Since the items are all the same size the computer can figure out exactly where
+ANY element is with just an offset (stem:[position = offset * size_{entry}]).
+
+This allows you to "jump" to any spot in the array in the computer's memory in constant time
+and computers are quite good at this sort of thing. Accessing a given direct address with a primitive
+(in this case float) format can usually be done in a matter of nanoseconds! This means you
+can literally do billions of these operations per second!
+
+Arrays are the most basic *collection* of data in most programming languages, and while very
+fast and compact they have some drawbacks (the bonus question has you explore this).
+Newer programming languages support them for their size/speed, but usually define and use
+more advanced collections for various reasons.
+
+QUIZ::
+Do arrays have to be contiguous in memory?
+
+BONUS::
+If you need to "expand" an array (i.e. you run out of space and need to hold more things)
+and the computer has no free memory *right next to* the old array, what would you have
+to do in order to be able to use a bigger array? If the array way already quite large
+would this cause you concerns? Why?
+
+BONUS::
+Say you have an array that can hold 1000 float. You've initialized 600 of them (so the last 400
+don't yet have values you care about). You realize that you to INSERT an element at offset
+50, but you don't want to *overwrite* the value that is there. You want to keep the existing good
+data. What do you have to do? Thoughts about this?
+
+==== Relation to Strings
+
+Arrays and strings, as you might have guessed, are very similar.
+
+In fact, some programming languages (C and C++) explicitly *use* arrays of characters AS
+strings in their formal definition.
+
+Many more modern languages define strings as a separate conceptual thing, even though they
+are usually stored as an array of characters internally.
+
+The reason we treat arrays and strings as different things in most languages has to do with how
+we'll commonly use them. Strings are almost always used for human-readable content that
+will be shown with some font on a display or printer, or for portions of input documents that the
+computer will process by interpreting the data through a character encoding.
+
+So, you can think of a string as an "array of characters" (though your programming language may
+not allow you "program it that way" for safety).
+
+QUIZ::
+Say you write a program to process the data in the file. What do you suppose happens if your program
+assumes that data is encoded as UTF-8 string data, but the file is actually encoded with
+a historical encoding like the one used for greek?
+
+== More Advanced Data Structures
+
+== Classes and Objects
