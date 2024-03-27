@@ -342,7 +342,7 @@ For example:
 
 and after the set operation (e.g. `arr[1] = 3.4f`) we'll have this:
 
-[ditaa, target=arr2]
+[ditaa,target=arr2]
 -----
 offset +---------+
     0  | ???     |
@@ -363,7 +363,7 @@ is not currently in use, and then you're asking it to produce the correct instru
 the data in that block. So, say our computer had some free space at address 1024, then
 our array of floats actually looks something like this in memory:
 
-[ditaa, target=arrdetail]
+[ditaa,target=arrdetail]
 -----
             the bit pattern of floats is "4 bytes wide"
 address   +---------+ +---------+ +---------+ +---------+
@@ -378,7 +378,6 @@ address   +---------+ +---------+ +---------+ +---------+
      1032 | 11010101| | 01001011| | 11001111| | 11010110|
           +---------+ +---------+ +---------+ +---------+
 -----
-
 
 The idea of a linear sequence of the "same kind of" things in the computer's memory is
 actually quite useful for a few reasons:
@@ -436,5 +435,212 @@ assumes that data is encoded as UTF-8 string data, but the file is actually enco
 a historical encoding like the one used for greek?
 
 == More Advanced Data Structures
+
+=== Linked Lists
+
+=== Maps a.k.a. Dictionaries
+
+=== Sets
+
+=== Vectors
+
+== Functional Programming Workhorses
+
+Functional programming languages leverage the idea of sequences quite a bit. Sequences
+of operations, sequences of values, etc. The actual underlying data structure could
+be an array, a linked list, a map, or really anything that can be turned into items that
+come one after another.
+
+When you have such a sequence of values you will be surprised at how many different problems
+can be solved by a very small number of programming language primitives. By far the
+most important are:
+
+map::
+An operation that converts one sequence into a different sequence of exactly the same length as
+the original.
+
+filter::
+An operation that returns a new sequence of just the elements of the input sequence that
+match some condition.
+
+reduce::
+An operation that combines the elements of the sequence together into a single final result.
+
+=== Mapping a sequence
+
+Mapping a sequence is a very simple operation that can be described like this:
+
+[ditaa,target=mapseq]
+-----
+   +---+ +---+ +---+ +---+
+   | A | | B | | C | | D |  ...
+   +-+-+ +-+-+ +-+-+ +-+-+
+     |     |     |     |
+     v     v     v     v
+   +---+ +---+ +---+ +---+
+   | l | | m | | n | | o |  ...
+   +---+ +---+ +---+ +---+
+-----
+
+where the down-pointing arrows are defined as a function that can convert the values
+in the top sequence to the values in the bottom. There are *no* restrictions
+on what this function does. For example, it could nest the values from the top into
+complex data structures, and thus the result would be a sequence of these
+new complex data structures.
+
+==== Clojure Example
+
+So, say you wanted to create a sequence of Clojure maps that look like this:
+
+[source]
+-----
+[{:x 1 :y 2}
+ {:x 2 :y 3}
+ {:x 3 :y 4}
+ {:x 4 :y 5}]
+-----
+
+you might notice that the y value is always just one more than the x. So, if you create a simple
+sequence of numbers, you can use `map`:
+
+[source]
+-----
+(map
+  (fn [n] {:x n :y (+ 1 n)})
+  [1 2 3 4])
+-----
+
+It turns out that clojure can accept more than one sequence for map, and you can just increase
+the number of arguments to the function. In this case ALL of the sequences are walked together,
+giving the corresponding elements to the function. For example:
+
+[source]
+----
+(map
+  (fn [item-from-a item-from-b]
+    (+ item-from-a item-from-b))
+  [1 2 3]
+  [10 11 12])
+----
+
+results in the sequence 11, 13, 15.
+
+=== Filtering a Sequence
+
+Very often an input sequence will contain values that you want, and those you do not. The point of
+filtering a sequence therefore is defined to look basically like this:
+
+[ditaa,target=filterseq]
+-----
+   +---+ +---+ +---+ +---+
+   | A | | B | | C | | D |  ...
+   +-+-+ +-+-+ +-+-+ +-+-+
+     |           |
+     v           v
+   +---+       +---+
+   | A |       | C |
+   +---+       +---+
+-----
+
+the output sequence is still a sequence, it is just a "selection" of items from the original.
+
+==== Clojure Example
+
+[source]
+-----
+(filter (fn [n] (odd? n)) [1 2 3 4])
+-----
+
+results in:
+
+[source]
+-----
+[1 3]
+-----
+
+=== Reducing a Sequence
+
+Reduce is a real powerhouse operation. Mathematically, the idea is very simple. The inputs
+are:
+
+* A starting value.
+* A function that can combine two values into one.
+* A sequence of additional values.
+
+The operation then proceeds as follows. Let `start` be the starting value. Let stem:[S_n] be the
+nth element of the additional values. Let stem:[V_n] be the (internal temporary) value of the
+reduction (so far). Then, the reduction of m elements looks like this:
+
+[stem]
+++++
+V_1 = "combine"("start", S_1)
+
+V_2 = "combine"(V_1, S_2)
+
+V_3 = "combine"(V_2, S_3)
+
+V_m = "combine"(V_{m-1}, S_m)
+++++
+
+For example, let's say the `combine` function was addition, the
+starting value was 0, and the sequence was  4, 5, 6. The reduction would be:
+
+[stem]
+++++
+4 = add(0, 4)
+
+9 = add(4, 5)
+
+15 = add(9, 6)
+++++
+
+so the answer of the reduction would be 15.
+
+The sequence values can be *anything*, as can the *operation* (as long as the operation can
+successfully combine the two things it receives, and returns something that can
+be used as the first argument of the combine operation on the next step).
+
+IMPORTANT: The result is a single *thing*, but that *thing* can be anything (e.g. a collection, primitive, etc.)
+
+
+==== Clojure Example
+
+In Clojure the `reduce` function takes the combine operation, the starting value, then the sequence.
+
+[source]
+-----
+(reduce
+  (fn [a b] (+ a b))
+  0
+  [4 5 6])
+-----
+
+but since `+` is already a function that can take two arguments, you can shorten this to:
+
+[source]
+-----
+(reduce + 0 [4 5 6])
+-----
+
+because the starting value and result can be anything, it is actually possible to
+use `reduce` to build up new sequences.
+
+To demonstrate this we'll tell you about the `conj` function. This function
+just adds an element to the end of a vector. For example,
+`(conj [] 1)` => `[1]` and `(conj [1] 2)` => `[1 2]`, `(conj [1 2] 3)` => `[1 2 3]` etc.
+
+So we can use this to have reduce actually build a sequence:
+
+[source]
+-----
+(reduce
+  (fn [a b]
+    (conj a (+ 1 b)))
+  []
+  [1 2 3])
+-----
+
+QUIZ::
+What is the output of the example? What have you seen before that this is equivalent to?
 
 == Classes and Objects
