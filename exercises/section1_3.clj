@@ -8,7 +8,7 @@
 (+ 1 2 3 4 5)
 (* 2 2 2)
 (/ 4 2)
-
+(/ 13 2)
 ;; You can ask for the "type" of *anything* in Clojure using the
 ;; `type` function. Try this:
 (type 5)
