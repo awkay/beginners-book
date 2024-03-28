@@ -1,3 +1,5 @@
 .idea
 docs/.asciidoctor
 .cpcache
+/.nrepl-port
+/beginners-book.iml
