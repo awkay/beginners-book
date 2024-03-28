@@ -55,11 +55,12 @@
 ;; What do you notice?
 
 (time
-  (dotimes [n 1000000]
-    (/ 1 9.238475)))
+  (dotimes [n 10000000]
+    (* 1 9.238475)))
+
 (time
-  (dotimes [n 1000000]
-    (/ 1M 9.238475M)))
+  (dotimes [n 10000000]
+    (* 1M 9.238475M)))
 
 ;; Characters
 
