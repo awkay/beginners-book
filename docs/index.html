@@ -549,8 +549,22 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <li><a href="#_arrays">1.3.5. Arrays</a></li>
 </ul>
 </li>
-<li><a href="#_more_advanced_data_structures">1.4. More Advanced Data Structures</a></li>
-<li><a href="#_classes_and_objects">1.5. Classes and Objects</a></li>
+<li><a href="#_more_advanced_data_structures">1.4. More Advanced Data Structures</a>
+<ul class="sectlevel3">
+<li><a href="#_linked_lists">1.4.1. Linked Lists</a></li>
+<li><a href="#_maps_a_k_a_dictionaries">1.4.2. Maps a.k.a. Dictionaries</a></li>
+<li><a href="#_sets">1.4.3. Sets</a></li>
+<li><a href="#_vectors">1.4.4. Vectors</a></li>
+</ul>
+</li>
+<li><a href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a>
+<ul class="sectlevel3">
+<li><a href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></li>
+<li><a href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></li>
+<li><a href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></li>
+</ul>
+</li>
+<li><a href="#_classes_and_objects">1.6. Classes and Objects</a></li>
 </ul>
 </li>
 </ul>
@@ -1295,10 +1309,268 @@ a historical encoding like the one used for greek?</p>
 </div>
 <div class="sect2">
 <h3 id="_more_advanced_data_structures"><a class="anchor" href="#_more_advanced_data_structures"></a><a class="link" href="#_more_advanced_data_structures">1.4. More Advanced Data Structures</a></h3>
+<div class="sect3">
+<h4 id="_linked_lists"><a class="anchor" href="#_linked_lists"></a><a class="link" href="#_linked_lists">1.4.1. Linked Lists</a></h4>
 
 </div>
+<div class="sect3">
+<h4 id="_maps_a_k_a_dictionaries"><a class="anchor" href="#_maps_a_k_a_dictionaries"></a><a class="link" href="#_maps_a_k_a_dictionaries">1.4.2. Maps a.k.a. Dictionaries</a></h4>
+
+</div>
+<div class="sect3">
+<h4 id="_sets"><a class="anchor" href="#_sets"></a><a class="link" href="#_sets">1.4.3. Sets</a></h4>
+
+</div>
+<div class="sect3">
+<h4 id="_vectors"><a class="anchor" href="#_vectors"></a><a class="link" href="#_vectors">1.4.4. Vectors</a></h4>
+
+</div>
+</div>
 <div class="sect2">
-<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.5. Classes and Objects</a></h3>
+<h3 id="_functional_programming_workhorses"><a class="anchor" href="#_functional_programming_workhorses"></a><a class="link" href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a></h3>
+<div class="paragraph">
+<p>Functional programming languages leverage the idea of sequences quite a bit. Sequences
+of operations, sequences of values, etc. The actual underlying data structure could
+be an array, a linked list, a map, or really anything that can be turned into items that
+come one after another.</p>
+</div>
+<div class="paragraph">
+<p>When you have such a sequence of values you will be surprised at how many different problems
+can be solved by a very small number of programming language primitives. By far the
+most important are:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">map</dt>
+<dd>
+<p>An operation that converts one sequence into a different sequence of exactly the same length as
+the original.</p>
+</dd>
+<dt class="hdlist1">filter</dt>
+<dd>
+<p>An operation that returns a new sequence of just the elements of the input sequence that
+match some condition.</p>
+</dd>
+<dt class="hdlist1">reduce</dt>
+<dd>
+<p>An operation that combines the elements of the sequence together into a single final result.</p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="_mapping_a_sequence"><a class="anchor" href="#_mapping_a_sequence"></a><a class="link" href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></h4>
+<div class="paragraph">
+<p>Mapping a sequence is a very simple operation that can be described like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/mapseq.png" alt="mapseq" width="350" height="168">
+</div>
+</div>
+<div class="paragraph">
+<p>where the down-pointing arrows are defined as a function that can convert the values
+in the top sequence to the values in the bottom. There are <strong>no</strong> restrictions
+on what this function does. For example, it could nest the values from the top into
+complex data structures, and thus the result would be a sequence of these
+new complex data structures.</p>
+</div>
+<div class="sect4">
+<h5 id="_clojure_example"><a class="anchor" href="#_clojure_example"></a><a class="link" href="#_clojure_example">Clojure Example</a></h5>
+<div class="paragraph">
+<p>So, say you wanted to create a sequence of Clojure maps that look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">[{<span class="symbol">:x</span> <span class="integer">1</span> <span class="symbol">:y</span> <span class="integer">2</span>}
+ {<span class="symbol">:x</span> <span class="integer">2</span> <span class="symbol">:y</span> <span class="integer">3</span>}
+ {<span class="symbol">:x</span> <span class="integer">3</span> <span class="symbol">:y</span> <span class="integer">4</span>}
+ {<span class="symbol">:x</span> <span class="integer">4</span> <span class="symbol">:y</span> <span class="integer">5</span>}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>you might notice that the y value is always just one more than the x. So, if you create a simple
+sequence of numbers, you can use <code>map</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">map</span>
+  (<span class="keyword">fn</span> [n] {<span class="symbol">:x</span> n <span class="symbol">:y</span> (<span class="keyword">+</span> <span class="integer">1</span> n)})
+  [<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span> <span class="integer">4</span>])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It turns out that clojure can accept more than one sequence for map, and you can just increase
+the number of arguments to the function. In this case ALL of the sequences are walked together,
+giving the corresponding elements to the function. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">map</span>
+  (<span class="keyword">fn</span> [item-from-a item-from-b]
+    (<span class="keyword">+</span> item-from-a item-from-b))
+  [<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span>]
+  [<span class="integer">10</span> <span class="integer">11</span> <span class="integer">12</span>])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>results in the sequence 11, 13, 15.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_filtering_a_sequence"><a class="anchor" href="#_filtering_a_sequence"></a><a class="link" href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></h4>
+<div class="paragraph">
+<p>Very often an input sequence will contain values that you want, and those you do not. The point of
+filtering a sequence therefore is defined to look basically like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/filterseq.png" alt="filterseq" width="350" height="168">
+</div>
+</div>
+<div class="paragraph">
+<p>the output sequence is still a sequence, it is just a "selection" of items from the original.</p>
+</div>
+<div class="sect4">
+<h5 id="_clojure_example_2"><a class="anchor" href="#_clojure_example_2"></a><a class="link" href="#_clojure_example_2">Clojure Example</a></h5>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">filter</span> (<span class="keyword">fn</span> [n] (<span class="keyword">odd?</span> n)) [<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span> <span class="integer">4</span>])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>results in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">[<span class="integer">1</span> <span class="integer">3</span>]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_reducing_a_sequence"><a class="anchor" href="#_reducing_a_sequence"></a><a class="link" href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></h4>
+<div class="paragraph">
+<p>Reduce is a real powerhouse operation. Mathematically, the idea is very simple. The inputs
+are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A starting value.</p>
+</li>
+<li>
+<p>A function that can combine two values into one.</p>
+</li>
+<li>
+<p>A sequence of additional values.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The operation then proceeds as follows. Let <code>start</code> be the starting value. Let \$S_n\$ be the
+nth element of the additional values. Let \$V_n\$ be the (internal temporary) value of the
+reduction (so far). Then, the reduction of m elements looks like this:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$V_1 = "combine"("start", S_1)\$
+<br>
+\$V_2 = "combine"(V_1, S_2)\$
+<br>
+\$V_3 = "combine"(V_2, S_3)\$
+<br>
+\$V_m = "combine"(V_{m-1}, S_m)\$
+</div>
+</div>
+<div class="paragraph">
+<p>For example, let&#8217;s say the <code>combine</code> function was addition, the
+starting value was 0, and the sequence was  4, 5, 6. The reduction would be:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$4 = add(0, 4)\$
+<br>
+\$9 = add(4, 5)\$
+<br>
+\$15 = add(9, 6)\$
+</div>
+</div>
+<div class="paragraph">
+<p>so the answer of the reduction would be 15.</p>
+</div>
+<div class="paragraph">
+<p>The sequence values can be <strong>anything</strong>, as can the <strong>operation</strong> (as long as the operation can
+successfully combine the two things it receives, and returns something that can
+be used as the first argument of the combine operation on the next step).</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+The result is a single <strong>thing</strong>, but that <strong>thing</strong> can be anything (e.g. a collection, primitive, etc.)
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_clojure_example_3"><a class="anchor" href="#_clojure_example_3"></a><a class="link" href="#_clojure_example_3">Clojure Example</a></h5>
+<div class="paragraph">
+<p>In Clojure the <code>reduce</code> function takes the combine operation, the starting value, then the sequence.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">reduce</span>
+  (<span class="keyword">fn</span> [a b] (<span class="keyword">+</span> a b))
+  <span class="integer">0</span>
+  [<span class="integer">4</span> <span class="integer">5</span> <span class="integer">6</span>])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>but since <code>+</code> is already a function that can take two arguments, you can shorten this to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">reduce</span> <span class="keyword">+</span> <span class="integer">0</span> [<span class="integer">4</span> <span class="integer">5</span> <span class="integer">6</span>])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>because the starting value and result can be anything, it is actually possible to
+use <code>reduce</code> to build up new sequences.</p>
+</div>
+<div class="paragraph">
+<p>To demonstrate this we&#8217;ll tell you about the <code>conj</code> function. This function
+just adds an element to the end of a vector. For example,
+<code>(conj [] 1)</code> &#8658; <code>[1]</code> and <code>(conj [1] 2)</code> &#8658; <code>[1 2]</code>, <code>(conj [1 2] 3)</code> &#8658; <code>[1 2 3]</code> etc.</p>
+</div>
+<div class="paragraph">
+<p>So we can use this to have reduce actually build a sequence:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">reduce</span>
+  (<span class="keyword">fn</span> [a b]
+    (<span class="keyword">conj</span> a (<span class="keyword">+</span> <span class="integer">1</span> b)))
+  []
+  [<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span>])</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>What is the output of the example? What have you seen before that this is equivalent to?</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.6. Classes and Objects</a></h3>
 
 </div>
 </div>
@@ -1306,7 +1578,7 @@ a historical encoding like the one used for greek?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-27 14:32:09 -0700
+Last updated 2024-03-27 15:23:43 -0700
 </div>
 </div>
 </body>
