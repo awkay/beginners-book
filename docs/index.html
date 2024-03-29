@@ -1089,7 +1089,7 @@ Clojure and Clojurescript are <strong>ok</strong> with putting a literal new lin
 method of doing this is <strong>just</strong> like the method for embedding a quote within quotes: use a <code>\</code>. The most common
 special embedded things are: <code>\n</code> (newline), <code>\r</code> (Windows, carriage return, old typewriter garbage), <code>\t</code> TAB. In
 many programming languages the special <code>\u0000</code> means to use a literal unicode value (e.g. π can be typed into
-a string as "\u03A0" in Java and Clojure).</p>
+a string as "\u03C0" in Java and Clojure).</p>
 </div>
 <div class="paragraph">
 <p>So, in Java you&#8217;d change the broken example above to:</p>
@@ -1243,6 +1243,24 @@ and computers are quite good at this sort of thing. Accessing a given direct add
 (in this case float) format can usually be done in a matter of nanoseconds! This means you
 can literally do billions of these operations per second!</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+An operation that can be run with some small fixed-size number of instructions is said to run
+in "constant time". This is often annotated in computer science as O(1). The idea is to express
+the relative speed of something (given an idealized computer) relative to other kinds of operations
+that might produce the same result. Constant time algorithms are the fastest, but comparing
+two different constant time algorithms, of course, might yield a different actual run-time. For example,
+the function to convert Fahrenheit to Centigrade is a constant time function, but since it involves
+a few math operations it might be a bit slower than an array access.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>Arrays are the most basic <strong>collection</strong> of data in most programming languages, and while very
 fast and compact they have some drawbacks (the bonus question has you explore this).
@@ -1309,21 +1327,500 @@ a historical encoding like the one used for greek?</p>
 </div>
 <div class="sect2">
 <h3 id="_more_advanced_data_structures"><a class="anchor" href="#_more_advanced_data_structures"></a><a class="link" href="#_more_advanced_data_structures">1.4. More Advanced Data Structures</a></h3>
+<div class="paragraph">
+<p>Formally, a data structure in programming is an invention of Computer Science aimed at the
+efficient storage and retrieval of information. Arrays, as covered in the prior section,
+are perhaps the most basic data structure.</p>
+</div>
+<div class="paragraph">
+<p>If you did the exercises then you already know the weaknesses of arrays:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It is expensive to insert something into the middle. (you have to copy the "tail" over 1 if you have space,
+and otherwise copy the whole thing)</p>
+</li>
+<li>
+<p>It is expensive when you run out of the pre-allocated size of the array (you have to copy the entire thing
+to a new place)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Another weakness of arrays is their limited organization. You have numerical offsets as keys. What if you&#8217;re
+trying to look up things by a person&#8217;s name, or a book&#8217;s title? How would you convert a "name" into an
+"offset"? (Actually, there&#8217;s a good and useful answer to that, which is yet another fun invention of
+Computer Science).</p>
+</div>
+<div class="paragraph">
+<p>But suffice to say that arrays are not the best tool for every job. In fact, arrays are often only used in
+high performance applications where their limitations can be dealt with in a constrained way.</p>
+</div>
+<div class="paragraph">
+<p>So, what else do we have in our toolbox? Let&#8217;s see.</p>
+</div>
 <div class="sect3">
 <h4 id="_linked_lists"><a class="anchor" href="#_linked_lists"></a><a class="link" href="#_linked_lists">1.4.1. Linked Lists</a></h4>
-
+<div class="paragraph">
+<p>A linked list, when drawn out, is a very simple thing:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/linkedlist.png" alt="linkedlist" width="400" height="98">
+</div>
+</div>
+<div class="paragraph">
+<p>We allocate individual "chunks" of memory that we refer to as "nodes". Each node has internal storage that can
+hold a value. In Clojure, the type of this value can be "anything".  Each node also has a "pointer" to the
+next chunk of memory that holds data for the list. We "terminate" the list the same way we terminate strings. With
+a value we refer to as "null" (in clojure "null" is written as <code>nil</code>).</p>
+</div>
+<div class="paragraph">
+<p>The memory for a node can be allocated at any time, and because
+of the "pointer" structure, it need not be contiguous in memory like it has to be for an array.</p>
+</div>
+<div class="paragraph">
+<p>So, the clear advantage of a linked list is that it can expand in "constant time". There is no need to copy
+any old elements anywhere. Simply make a new node and point it&#8217;s "next node" pointer at the old list:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/linkedlistadd.png" alt="linkedlistadd" width="480" height="98">
+</div>
+</div>
+<div class="paragraph">
+<p>It is also technically possible to put a new bit of data "in the middle" by just re-routing the pointers:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/linkedlistinsert.png" alt="linkedlistinsert" width="400" height="168">
+</div>
+</div>
+<div class="paragraph">
+<p>Of course there are down-sides:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>To "read" a node at some offset, you must manually step through each node, tracking how many steps you&#8217;ve taken,
+and then read the data from the node you eventually get to.</p>
+</li>
+<li>
+<p>Inserting a node or appending to the "end" are also proportional to the number of items in the list.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This concept of a process taking some number of steps that is proportional to the number of data items is known as a "linear time algorithm", which basically means each such operation costs an amount of time proportional to the
+size of the data being stored. This is usually written O(n) to indicate it runs in a time proportional to the number
+<code>n</code> of items in the target. Notice that like O(1) this is simply used to specify a rough idea about relative speed.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In languages like Java and C++ linked lists are provided in several variants, and they are fully editable at
+runtime. You don&#8217;t have to manage the "pointers", because these pre-written implementations do all the hard work
+and just give you ways of doing the operations abstractly.</p>
+</div>
+<div class="paragraph">
+<p>In Clojure the <code>list</code> function can be used to make a list, and the <code>cons</code> function can be used to make a
+<strong>new</strong> list whose <strong>tail</strong> is some existing list. The reason for this is that in Clojure once data is created, it
+is not allowed to be changed. This had all sorts of advantages which we will discuss later, but it means that
+Clojure lists don&#8217;t allow "middle of the list" inserts.</p>
+</div>
+<div class="paragraph">
+<p>So in Clojure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">list1</span> (<span class="keyword">list</span> <span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span>))</code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/list1.png" alt="list1" width="370" height="98">
+</div>
+</div>
+<div class="paragraph">
+<p>makes a new linked list called list1.</p>
+</div>
+<div class="paragraph">
+<p>and this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">list2</span> (<span class="keyword">cons</span> <span class="integer">10</span> list1))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>makes a new NODE and points it at the other list:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/list2.png" alt="list2" width="370" height="196">
+</div>
+</div>
+<div class="paragraph">
+<p>In data structure theory this is known as <strong>structural sharing</strong>, and
+has two advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Users of <code>list1</code> can <strong>absolutely rely</strong> on the value of the list <strong>never</strong>
+changing at runtime. There is no operation that can corrupt that value. The
+"name" <code>list1</code> could technically be re-bound to point at some completely
+<strong>new</strong> value, but anyone that has the original list can trust it not to change. In languages like Java, lists are <strong>mutable</strong>, meaning that a program
+has no such guarantees, and that is a common source of problems
+and confusion.</p>
+</li>
+<li>
+<p>New lists can be based on old ones, saving memory. The runtime of
+the program <strong>looks</strong> like it has a list of length 3, and a different list
+of length 4; however, the truth is that it has one list with <strong>two names</strong>
+that happen to be bound to different locations within the same list!</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Why can&#8217;t Clojure allow you to put things at the end of an existing list?</p>
+</dd>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>What (conceptually, not as code) would you need to do to make a
+new list in Clojure that had a new item at the <strong>end</strong>?</p>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_maps_a_k_a_dictionaries"><a class="anchor" href="#_maps_a_k_a_dictionaries"></a><a class="link" href="#_maps_a_k_a_dictionaries">1.4.2. Maps a.k.a. Dictionaries</a></h4>
+<div class="paragraph">
+<p>So far we&#8217;ve seen two data structures (arrays and lists) which store
+things linearly. Arrays give direct indexed access, and lists require
+a linear walk. Arrays are expensive to expand, but lists can be
+expanded (in some ways) at lower expense.</p>
+</div>
+<div class="paragraph">
+<p>But what about the case of a simple English Dictionary? Historically
+we&#8217;ve built those by alphabetizing the words and storing them in
+linear order, right?</p>
+</div>
+<div class="paragraph">
+<p>So, technically we could use an array or list to make such a thing,
+but there are some problems with doing that.</p>
+</div>
+<div class="paragraph">
+<p>An array, for example, must have <strong>equal-sized</strong> elements (remember that
+the indexed access requires jumping to a calculation position in memory
+based on the element size). We could store just the word and a pointer
+to a string at each array element:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/arrayofpointers.png" alt="arrayofpointers" width="330" height="168">
+</div>
+</div>
+<div class="paragraph">
+<p>but then at least the word itself would have to fit in each element (so
+there would be some wasted space for most entries).</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>If our dictionary was structure as above, what would be the computational cost of putting in a new word (if we were trying to maintain a sorted order)?</p>
+</dd>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>If you used a linked list instead of an array, what would that look like?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>If the array is sorted, then one way of finding a definition is to search by what is known as a "binary search". A binary search is one where basically you look at the "middle" and see if you&#8217;ve gone too far or not. This lets you eliminate half of things at a time. Just imagine you are looking for the word "Joker" in a paper dictionary. You open the dictionary in the approximate middle, and see you&#8217;ve hit the word "knight". So, you ignore the latter half of the dictionary, and look in the rough middle of the other half. You find "dry". Now you eliminate the "earlier part" of that, split again, etc.  As a human you might tune this a bit (you might say "I know that J comes just before K, so I&#8217;ll just page back a bit), but you get the general principle.</p>
+</div>
+<div class="paragraph">
+<p>So, say our dictionary contains 1000 words, and we search it like the above. The first step eliminates 500 things. Then the next step eliminates another 250. Then 125, and so on. At some point it is faster just to do a linear walk of what remains, but at the limit this takes \$log_2 N\$ steps.</p>
+</div>
+<div class="paragraph">
+<p>So, if we had 1 million words, such a search takes (in the very worst case) about \$\floor{log_2 1000000} = 19\$ steps, but many times we&#8217;ll find the word earlier than that. Still, it is much faster than a pure linear search!</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Consider the answers to the two prior quiz questions. Now that you&#8217;ve seen binary search, what do you think of the possible linked-list implementation? Why?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Computer science has spent a lot of time thinking up alternative answers to this problem. Fortunately, they&#8217;ve been doing that for 70+ years so you don&#8217;t have to invent these things, and modern progamming languages just "come with" various versions that are good for this task, in various different ways. Some are faster at lookups, some are faster at inserts, some behave better over time when there have been lots of edits, etc.  There are a <strong>lot</strong> of trade-offs that you could consider.</p>
+</div>
+<div class="paragraph">
+<p>In Clojure, there is a general-purpose version of this data structure which can
+be created using curly braces, where the "key" and "value" pairs are simply listed
+in order:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="string"><span class="delimiter">&quot;</span><span class="content">a</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition1</span><span class="delimiter">&quot;</span></span>
+ <span class="string"><span class="delimiter">&quot;</span><span class="content">as</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition2</span><span class="delimiter">&quot;</span></span>
+ <span class="string"><span class="delimiter">&quot;</span><span class="content">ask</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition3</span><span class="delimiter">&quot;</span></span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Javascript uses a similar but more limited version that looks very similar:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{<span class="key"><span class="delimiter">&quot;</span><span class="content">a</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">definition1</span><span class="delimiter">&quot;</span></span>,
+ <span class="key"><span class="delimiter">&quot;</span><span class="content">as</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">definition2</span><span class="delimiter">&quot;</span></span>,
+ <span class="key"><span class="delimiter">&quot;</span><span class="content">ask</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">definition3</span><span class="delimiter">&quot;</span></span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and if you&#8217;re curious what it looks like in Java (and many other similar languages), it is something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; m = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt;();
+m.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">a</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">definition1</span><span class="delimiter">&quot;</span></span>);
+m.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">as</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">definition2</span><span class="delimiter">&quot;</span></span>);
+m.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">ask</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">definition3</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that in Javascript the "key" always has to be a string, but in Clojure the key can be absolutely anything. Also notice that in Java there is no short/concise way to type out a map.  You have to make one (that&#8217;s what <code>new</code> does), and then stick
+things in one-at-a-time.</p>
+</div>
+<div class="paragraph">
+<p>General-purpose maps typically have the following characteristics:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Adding an entry takes time proportional to the \$log N\$ where N is the number of things already in the map.</p>
+</li>
+<li>
+<p>Removing an entry is similar.</p>
+</li>
+<li>
+<p>The <strong>overhead</strong> (cost of the data structure&#8217;s management) for storing things is relatively low.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As such, maps are a great way to organize data that needs to be accessed</p>
+</div>
+<div class="paragraph">
+<p>In most languages (Java, Javascript, C++, etc.) maps are mutable. You can change their content dynamically. This has the same potential problems we discussed with linked lists.</p>
+</div>
+<div class="paragraph">
+<p>Maps in Clojure, like linked lists in Clojure, are immutable. They cannot be changed once created. However, they have the same exact benefits as lists: the way they are constructed allows for structural sharing, so creating a new version of a map with some difference is a very fast operation, which is also very efficient on space.</p>
+</div>
+<div class="paragraph">
+<p>Creating a new map from an old one, where you want to add entries, can be done with <code>assoc</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">m1</span> {<span class="string"><span class="delimiter">&quot;</span><span class="content">a</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition1</span><span class="delimiter">&quot;</span></span>})
+(<span class="keyword">def</span> <span class="function">m2</span> (<span class="keyword">assoc</span> m1
+          <span class="string"><span class="delimiter">&quot;</span><span class="content">as</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition2</span><span class="delimiter">&quot;</span></span>
+          <span class="string"><span class="delimiter">&quot;</span><span class="content">ask</span><span class="delimiter">&quot;</span></span> <span class="string"><span class="delimiter">&quot;</span><span class="content">definition3</span><span class="delimiter">&quot;</span></span>)</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>If you run the two things in the prior code block, and then look at the value of <code>m1</code>, what would you expect to be in there?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>But in Java, for example, you can change the map in-place as you saw in the prior Java code block.</p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll learn some additional ways of working with maps in this section&#8217;s exercises.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>We mentioned earlier that maps in Clojure can use anything for keys and values. Can you think of a few different places where something other than strings as keys would be useful?</p>
+</dd>
+</dl>
+</div>
+<div class="sect4">
+<h5 id="_clojure_keywords"><a class="anchor" href="#_clojure_keywords"></a><a class="link" href="#_clojure_keywords">Clojure Keywords</a></h5>
+<div class="paragraph">
+<p>This is a good time to talk about Clojure <strong>keywords</strong>. Remember when we talked about storing the "words" of the dictionary in an array earlier? The weakness, as you recall, was a bit of wasted space, but we actually didn&#8217;t mention another downside: When you are searching for a word, you have to ask the computer to compare the word you want with the word that is in the dictionary, right? I mean how else will it know if it has found what you want?</p>
+</div>
+<div class="paragraph">
+<p>Remember that strings are just arrays of characters. So, if we&#8217;re looking for the word "knight" in our map, each step of the search has to do a character-by-character comparison (because that is all a CPU can actually do!).</p>
+</div>
+<div class="paragraph">
+<p>This means that a string comparison is an O(N) algorithm! The longer the word, and the more times we have to compare it, the worse things get.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="assets/img/diag-df7e0bdc48e52e09209f26c13667339d.png" alt="Diagram" width="360" height="182">
+</div>
+<div class="title">Figure 1. Comparing two strings. We have to do three comparisons to prove these are not the same.</div>
+</div>
+<div class="paragraph">
+<p>But what if there were a way for us to pre-encode something with human meaning into a number? That would mean that we could store our dictionary keyed by <strong>numbers</strong>, and then when we want to search we could encode our desired word into a number first, and do the search that way. This could be an improvement in performance, while also not really limiting our expressiveness.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>What does this last sentence mean by expressiveness?  I.e. Why does encoding an arbitrary string as a single number help expressiveness?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Of course there&#8217;s a limitation: you would not want to encode all the possible strings in the world as numbers, because that would require an arbitrarily large amount of space, and huge numbers! So, we&#8217;ve been leading you astray just a bit. We do <strong>not</strong> use keywords as a way to, say, encode the English language words in a map of the English Language Dictionary. In fact, we <em>would</em> actually use strings as the keys in this case because it is cost-prohibitive to encode all of English as pre-defined numbers. But hopefully, you&#8217;ve kind of seen the goal: when we are representing arbitrary, but semantically distinct, values within a map it is nice to have an efficient way to give a key an arbitrary name that cal also behave better at runtime.</p>
+</div>
+<div class="paragraph">
+<p>Thus, the purpose of keywords is just that: To allocate numbers for names that you want to use for your program&#8217;s data.</p>
+</div>
+<div class="paragraph">
+<p>In Clojure, keywords start with a <code>:</code>, and are followed by an optional <em>namespace</em> (a dot-separated sequence of glyphs), an optional <code>/</code> to indicate the end of the namespace, and then more non-whitespace glyphs for the name.</p>
+</div>
+<div class="paragraph">
+<p>Some examples are <code>:name</code>, <code>:something/other</code>, and <code>com.google/search-string</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <strong>namespace</strong> of a keyword is meant as a means of categorization, and the name is meant as a means of identity. For example, let&#8217;s say you want to store details about a person.  If you just used the keyword <code>:name</code> then it is ambiguous if you mean a person&#8217;s name, or a place&#8217;s name, or a dog&#8217;s name. The namespace allows us to clarify our intended meaning:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Fido</span><span class="delimiter">&quot;</span></span>}
 
+{<span class="symbol">:dog/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Fido</span><span class="delimiter">&quot;</span></span>}
+
+{<span class="symbol">:person/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Allison</span><span class="delimiter">&quot;</span></span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The underlying maps in all of these cases will encode the keyword into an efficient constant value that is fast to compare, but it maintains the readability and meaning to you the programmer!</p>
+</div>
+<div class="paragraph">
+<p>The namespace also makes it possible to put related keys into the same map, even if they have the same "name" portion:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:person/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Allison</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:dog/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Fido</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:cat/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Max</span><span class="delimiter">&quot;</span></span>}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+There is a recommendation if you write software in Clojure that might be used by others. The recommendation is that for any data that can be seen by other programmers, you should use namespaces for your keywords that contain a reverse domain name that you own (or perhaps uses a reverse domain name that clarifies the context of the information). Some examples might include <code>:com.google/search-string</code>, <code>:gov.us.irs/social-security-number</code>. These help ensure that if multiple programmers place data into the same map that they don&#8217;t accidentally overwrite each other!
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Say you want to represent a 3d cartesian coordinate in Clojure. Give some examples of different ways you might use maps to do that. Of the examples you generate, indicate the circumstances where you might choose that one over any others. Hints: would you use namespaces? What kinds of numbers might you use?</p>
+</dd>
+</dl>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_sets"><a class="anchor" href="#_sets"></a><a class="link" href="#_sets">1.4.3. Sets</a></h4>
-
+<div class="paragraph">
+<p>A set is a mathematical construct that has a well established set of useful operations. As a data structure a set is a collection of items where duplicates are not allowed. The performance characteristics are such that adding, removing, and asking "is this value in the set?" are fast operations.</p>
+</div>
+<div class="paragraph">
+<p>In Clojure these are created using curly braces as well, but by prefixing them with the <code>#</code> character.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">#{<span class="integer">1</span> <span class="integer">2</span> <span class="symbol">:a</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">hello</span><span class="delimiter">&quot;</span></span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>They can contain any kind of value.</p>
+</div>
+<div class="paragraph">
+<p>One of the primary operations on a set in Clojure is <code>contains?</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">contains?</span> #{<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span>} <span class="integer">1</span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which returns true if the item is in the set, and false otherwise.  There are, of course, set operations from mathematics like union, subtraction (or difference), intersection, etc.</p>
+</div>
+<div class="paragraph">
+<p>Sets are not nearly as commonly used as maps, but they do come up with regularity.</p>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_vectors"><a class="anchor" href="#_vectors"></a><a class="link" href="#_vectors">1.4.4. Vectors</a></h4>
-
+<div class="paragraph">
+<p>Clojure has an additional type that is similar in behavior to an array called a <code>vector</code>.  Internally it has a rather complex implementation that is meant to give performance that gets reasonably close to that of an array, with none of the drawbacks, all while have that same immutable guarantee that all the other Clojure data structures have!</p>
+</div>
+<div class="paragraph">
+<p>We write vectors use square brackets, with space between each item like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">[<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span> <span class="symbol">:a</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">hello</span><span class="delimiter">&quot;</span></span> <span class="float">42.5</span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>as you can see vectors can hold any kind of data.</p>
+</div>
+<div class="paragraph">
+<p>Making a new vector with an item changed is done just like with maps, using <code>assoc</code>, but instead of the map entry key, we give an offset like for arrays:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">a</span> [<span class="integer">1</span> <span class="integer">2</span> <span class="integer">3</span>])
+(<span class="keyword">def</span> <span class="function">b</span> (<span class="keyword">assoc</span> a <span class="integer">1</span> <span class="symbol">:x</span>))</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>What&#8217;s in <code>a</code> after this code runs?</p>
+</dd>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>What&#8217;s in <code>b</code> after this code runs?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The exercises will let you experiment more with vectors.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1578,7 +2075,7 @@ just adds an element to the end of a vector. For example,
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-27 15:23:43 -0700
+Last updated 2024-03-28 20:25:45 -0700
 </div>
 </div>
 </body>
