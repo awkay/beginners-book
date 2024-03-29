@@ -30,12 +30,19 @@
 
 ;; EXERCISE: Write the Clojure to get the equivalent result
 ;; for the arithmetic:  ((11 + 9) * 6) / 2
+(/ (* (+ 11 9) 6) 2)
+60
 
 ;; EXERCISE: What is the data type (e.g. use the type function) of
 ;; the ANSWER to the prior question?
+(type 60)
+;; java.lang.Long
 
 ;; EXERCISE: Do the prior question, but divide by 17 instead of 2. Is
 ;; it different? Why do you think?
+(/ (* (+ 11 9) 6) 17)
+120/17
+;;Result is not an integer = clojure displays non integers as fractions
 
 ;; A useful operation in integer division turns out to be the modulo operation. This returns the "remainder" from
 ;; the division, and is useful for converting a source number into a fixed range. Try the following sequence
