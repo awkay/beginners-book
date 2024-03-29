@@ -1956,6 +1956,9 @@ p.address = a;</code></pre>
 <div class="paragraph">
 <p>Here we use sets for "seeking" and "interests" because it would be silly to accidentally claim you&#8217;re seeking "friends" and "friends", or that you&#8217;re interested in "singing", "dancing", and "singing". But, we choose a vector for the message history, since no two messages will be completely identical (they happen over time), and we often want to review them in that order.</p>
 </div>
+<div class="paragraph">
+<p>Notice how we also use keywords for some of the "values" in the data (e.g. gender and seeking). This is a very common practice when the value of a particular thing is a limited number of values. We could use strings there, but strings take more space. We could use numbers, but numbers are difficult for us as humans to remember. Keywords again strike a nice balance between usability and efficiency.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -2210,7 +2213,7 @@ just adds an element to the end of a vector. For example,
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-29 08:16:26 -0700
+Last updated 2024-03-29 09:00:21 -0700
 </div>
 </div>
 </body>
