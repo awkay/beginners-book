@@ -28,6 +28,10 @@ ifdef::env-github[]
 toc::[]
 endif::[]
 
+The intended audience of this book is people who want to learn to program, and don't mind that the primary programming language used in this book is Clojure. The reason for this choice is mainly that it is the language I prefer to work in, and I want others to be able to learn it.
+
+The only real prerequisite is a basic understanding of simple Algebra, though even that isn't a hard requirement. It will just make it easier for you to follow the computer science bits more clearly. But, you don't even have to remember the quadratic equation.
+
 = Thinking About Information
 
 == Without Computers
@@ -107,11 +111,24 @@ be close or identical in many programming languages.
 
 === Boolean
 
-Basically a "true" or "false". Booleans are common to all programming languages. The boolean type is primarily used to either track if something is true (or not), or as the result of things like comparisons which can then be used to make decisions in programs.
+Basically a "true" or "false". The concept of logical truth. Booleans are common to all programming languages. The boolean type is primarily used to either track if something is true (or not), or as the result of things like comparisons which can then be used to make decisions in programs.
 
-For example, in Clojure `(> 2 1)` returns true to indicate that indeed 2 is greater than 1.
+For example, in languages list C, Java, and Javascript `2 > 1` evaluates to `true` to indicate that
+indeed 2 is greater than 1.
 
 There is a surprising complication that is common to many languages, though. Most programming languages have a set of rules (for convenience) for using other values in the program in place of the pure `true` or `false`. For example in C the number 0 is considered the same as false, but all other numbers are true.
+
+[source, c]
+-----
+int i = 3;
+
+if(i)
+  println("TRUE");
+else
+  println("FALSE");
+-----
+
+will print "TRUE", but if `i` were set to 0 it would print false.
 
 In Clojure, the symbols `true` and `false` are literals you can use for this purpose; however, the special value `nil` (which means no result) is considered synonymous with `false`, while every other value (including numeric 0) is considered synonymous with `true`.
 
@@ -177,6 +194,9 @@ the representation you want.
 | Java | 3.5f  | float
 | Javascript | 3.5  | double (no way to get float)
 |====
+
+QUIZ::
+In Clojure, would the value 3.22 be treated as `true` or `false` if evaluated as a boolean? What about 0?
 
 === Characters
 
@@ -1257,7 +1277,7 @@ sequence of numbers, you can use `map`:
 -----
 
 It turns out that clojure can accept more than one sequence for map, and you can just increase
-the number of arguments to the function. In this case ALL of the sequences are walked together,
+the number of arguments to the function. In this case ALL the sequences are walked together,
 giving the corresponding elements to the function. For example:
 
 [source]
