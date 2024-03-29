@@ -1126,7 +1126,7 @@ This is a very odd thing to do all by itself (with what you know so far), but we
 (def f (fn [x] (+ (* x 12) 42)))
 -----
 
-The above is, in fact, nearly exactly what `defn` does. It's just a bit noisy. If you review the exercises from the data structures, you'll remember that the `update` function could take an arbitrary operation when working on a map entry.
+NOTE: The above is, in fact, nearly exactly what `defn` does. It's just a bit noisy. If you review the exercises from the data structures, you'll remember that the `update` function could take an arbitrary operation when working on a map entry.
 
 QUIZ::
 Given our definition of `f`, what do you think this does?
