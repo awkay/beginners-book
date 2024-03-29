@@ -557,14 +557,19 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <li><a href="#_vectors">1.4.4. Vectors</a></li>
 </ul>
 </li>
-<li><a href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a>
+<li><a href="#_nesting_data">1.5. Nesting Data</a>
 <ul class="sectlevel3">
-<li><a href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></li>
-<li><a href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></li>
-<li><a href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></li>
+<li><a href="#_some_examples">1.5.1. Some Examples</a></li>
 </ul>
 </li>
-<li><a href="#_classes_and_objects">1.6. Classes and Objects</a></li>
+<li><a href="#_functional_programming_workhorses">1.6. Functional Programming Workhorses</a>
+<ul class="sectlevel3">
+<li><a href="#_mapping_a_sequence">1.6.1. Mapping a sequence</a></li>
+<li><a href="#_filtering_a_sequence">1.6.2. Filtering a Sequence</a></li>
+<li><a href="#_reducing_a_sequence">1.6.3. Reducing a Sequence</a></li>
+</ul>
+</li>
+<li><a href="#_classes_and_objects">1.7. Classes and Objects</a></li>
 </ul>
 </li>
 </ul>
@@ -1780,6 +1785,18 @@ There is a recommendation if you write software in Clojure that might be used by
 <div class="paragraph">
 <p>Sets are not nearly as commonly used as maps, but they do come up with regularity.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Sets are usually unordered (you can make sorted ones if you want, but that isn&#8217;t the default).
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_vectors"><a class="anchor" href="#_vectors"></a><a class="link" href="#_vectors">1.4.4. Vectors</a></h4>
@@ -1819,12 +1836,130 @@ There is a recommendation if you write software in Clojure that might be used by
 </dl>
 </div>
 <div class="paragraph">
+<p>You can pull a value from a vector with the same function you use on maps (<code>get</code>). You just use an offset
+as the "key":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">get</span> a <span class="integer">1</span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>The exercises will let you experiment more with vectors.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_functional_programming_workhorses"><a class="anchor" href="#_functional_programming_workhorses"></a><a class="link" href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a></h3>
+<h3 id="_nesting_data"><a class="anchor" href="#_nesting_data"></a><a class="link" href="#_nesting_data">1.5. Nesting Data</a></h3>
+<div class="paragraph">
+<p>Now that we&#8217;ve got the general idea of what data structures are, we should talk more about the fact that they can be combined with each other. Languages like Clojure and Javascript are  particularly good at this because the values in their data structures can be anything. Some programming languages require the programmer to be more specific about what they put in a data structure. There are good reasons for both, actually. In languages like Clojure the general philosophy is that the power of the flexibility is better, whereas languages that have the programmer pre-declare what will go inside a data structure are easier to build tools for that can detect certain classes of errors early.</p>
+</div>
+<div class="paragraph">
+<p>There are continuous debates about which approach is "right", and as with any such debate the answer is almost certainly "it depends". An experienced developer who has worked with both is often hard-pressed to define exactly when they would choose one over the other with objective criteria.</p>
+</div>
+<div class="paragraph">
+<p>One place where Clojure&#8217;s approach has some clear wins is when representing data. The ease and clarity you can get for a relatively complex bit of data, while also ensuring a measured amount of correctness, is quite good.</p>
+</div>
+<div class="paragraph">
+<p>Consider an example. Let&#8217;s try to do the exact same thing in Java and Clojure just to get an idea of the basic difference just in readability. First, Clojure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:person/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:person/age</span> <span class="integer">22</span>
+ <span class="symbol">:person/address</span> {<span class="symbol">:address/street</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and now the Java (note the use of Object, which is how you tell Java you want to be able to
+use "anything". Technically, this is about as close to a 1-to-1 comparison of the exact same operations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>, <span class="predefined-type">Object</span>&gt; person = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>,<span class="predefined-type">Object</span>&gt;();
+<span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>, <span class="predefined-type">Object</span>&gt; addr = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>,<span class="predefined-type">Object</span>&gt;();
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/name</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>);
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/age</span><span class="delimiter">&quot;</span></span>, <span class="integer">22</span>);
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/address</span><span class="delimiter">&quot;</span></span>, addr);
+addr.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">address/street</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, if you were doing it the "right way", one might argue it would look like this (even this is shorter than what most Java programmers would write):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="type">class</span> <span class="class">Person</span> {
+  <span class="directive">public</span> <span class="predefined-type">String</span> name;
+  <span class="directive">public</span> <span class="type">int</span> age;
+  <span class="directive">public</span> Address address;
+
+  <span class="directive">public</span> Person(<span class="predefined-type">String</span> name, <span class="predefined-type">String</span> age) {
+    <span class="local-variable">this</span>.name = name;
+    <span class="local-variable">this</span>.age = age;
+  }
+
+  <span class="directive">public</span> <span class="type">void</span> setAddress(Address a) {<span class="local-variable">this</span>.address = a;}
+}
+
+<span class="type">class</span> <span class="class">Address</span> {
+  <span class="directive">public</span> <span class="predefined-type">String</span> street;
+
+  <span class="directive">public</span> Address(<span class="predefined-type">String</span> street) { <span class="local-variable">this</span>.street = street; }
+}
+
+...
+
+Person p = <span class="keyword">new</span> Person(<span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>, <span class="integer">22</span>);
+Address a = <span class="keyword">new</span> Address(<span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>);
+p.address = a;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, in languages like Java you have to "pre-define" what your data will look like in great detail (what everything will be named and what type it will have). This results in quite an explosion of detail that the programmer must write just to create some simple nested data! The other problem is that it lacks flexibility. You have to go back and change the definition if you happen to need to carry around some extra fact. Whereas in Clojure you can just put it in there whenever the need arises:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">assoc</span> person <span class="symbol">:person/salary</span> <span class="integer">10300</span>)</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_some_examples"><a class="anchor" href="#_some_examples"></a><a class="link" href="#_some_examples">1.5.1. Some Examples</a></h4>
+<div class="paragraph">
+<p>One of the main tasks in programming is translating what you want in the real world into something that you can work on in a computer. In Clojure the ease of data nesting usually makes this relatively easy.</p>
+</div>
+<div class="paragraph">
+<p>If you need a collection of named values, you use a map.</p>
+</div>
+<div class="paragraph">
+<p>If you need a sequential collection of arbitrary things, you typically use a vector.</p>
+</div>
+<div class="paragraph">
+<p>If you need to ensure that a collection of arbitrary things is unique you usually use a set.</p>
+</div>
+<div class="paragraph">
+<p>For example, here&#8217;s how you might represent a profile for a person in a dating app:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:member/id</span> <span class="integer">902</span>
+ <span class="symbol">:member/alias</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Happy Singer</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:member/gender</span> <span class="symbol">:male</span>
+ <span class="symbol">:member/birth-year</span> <span class="integer">2000</span>
+ <span class="symbol">:member/seeking</span> #{<span class="symbol">:friends</span> <span class="symbol">:activity-partner</span>}
+ <span class="symbol">:member/messages</span> [{<span class="symbol">:message/time</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">12:31pm</span><span class="delimiter">&quot;</span></span>
+                    <span class="symbol">:message/recipient</span> {<span class="symbol">:member/id</span> <span class="integer">42</span>}
+                    <span class="symbol">:message/content</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Hi, how are you?</span><span class="delimiter">&quot;</span></span>} <span class="keyword">..</span><span class="keyword">.</span>]
+ <span class="symbol">:member/interests</span> #{{<span class="symbol">:interst/label</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">singing</span><span class="delimiter">&quot;</span></span>} {<span class="symbol">:interest/label</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">dancing</span><span class="delimiter">&quot;</span></span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we use sets for "seeking" and "interests" because it would be silly to accidentally claim you&#8217;re seeking "friends" and "friends", or that you&#8217;re interested in "singing", "dancing", and "singing". But, we choose a vector for the message history, since no two messages will be completely identical (they happen over time), and we often want to review them in that order.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_functional_programming_workhorses"><a class="anchor" href="#_functional_programming_workhorses"></a><a class="link" href="#_functional_programming_workhorses">1.6. Functional Programming Workhorses</a></h3>
 <div class="paragraph">
 <p>Functional programming languages leverage the idea of sequences quite a bit. Sequences
 of operations, sequences of values, etc. The actual underlying data structure could
@@ -1855,7 +1990,7 @@ match some condition.</p>
 </dl>
 </div>
 <div class="sect3">
-<h4 id="_mapping_a_sequence"><a class="anchor" href="#_mapping_a_sequence"></a><a class="link" href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></h4>
+<h4 id="_mapping_a_sequence"><a class="anchor" href="#_mapping_a_sequence"></a><a class="link" href="#_mapping_a_sequence">1.6.1. Mapping a sequence</a></h4>
 <div class="paragraph">
 <p>Mapping a sequence is a very simple operation that can be described like this:</p>
 </div>
@@ -1915,7 +2050,7 @@ giving the corresponding elements to the function. For example:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_filtering_a_sequence"><a class="anchor" href="#_filtering_a_sequence"></a><a class="link" href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></h4>
+<h4 id="_filtering_a_sequence"><a class="anchor" href="#_filtering_a_sequence"></a><a class="link" href="#_filtering_a_sequence">1.6.2. Filtering a Sequence</a></h4>
 <div class="paragraph">
 <p>Very often an input sequence will contain values that you want, and those you do not. The point of
 filtering a sequence therefore is defined to look basically like this:</p>
@@ -1946,7 +2081,7 @@ filtering a sequence therefore is defined to look basically like this:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_reducing_a_sequence"><a class="anchor" href="#_reducing_a_sequence"></a><a class="link" href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></h4>
+<h4 id="_reducing_a_sequence"><a class="anchor" href="#_reducing_a_sequence"></a><a class="link" href="#_reducing_a_sequence">1.6.3. Reducing a Sequence</a></h4>
 <div class="paragraph">
 <p>Reduce is a real powerhouse operation. Mathematically, the idea is very simple. The inputs
 are:</p>
@@ -2067,7 +2202,7 @@ just adds an element to the end of a vector. For example,
 </div>
 </div>
 <div class="sect2">
-<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.6. Classes and Objects</a></h3>
+<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.7. Classes and Objects</a></h3>
 
 </div>
 </div>
@@ -2075,7 +2210,7 @@ just adds an element to the end of a vector. For example,
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-28 20:25:45 -0700
+Last updated 2024-03-29 08:16:26 -0700
 </div>
 </div>
 </body>

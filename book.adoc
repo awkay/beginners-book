@@ -789,6 +789,8 @@ which returns true if the item is in the set, and false otherwise.  There are, o
 
 Sets are not nearly as commonly used as maps, but they do come up with regularity.
 
+NOTE: Sets are usually unordered (you can make sorted ones if you want, but that isn't the default).
+
 === Vectors
 
 Clojure has an additional type that is similar in behavior to an array called a `vector`.  Internally it has a rather complex implementation that is meant to give performance that gets reasonably close to that of an array, with none of the drawbacks, all while have that same immutable guarantee that all the other Clojure data structures have!
@@ -816,7 +818,111 @@ What's in `a` after this code runs?
 QUIZ::
 What's in `b` after this code runs?
 
+You can pull a value from a vector with the same function you use on maps (`get`). You just use an offset
+as the "key":
+
+[source]
+-----
+(get a 1)
+-----
+
 The exercises will let you experiment more with vectors.
+
+== Nesting Data
+
+Now that we've got the general idea of what data structures are, we should talk more about the fact that they can be combined with each other. Languages like Clojure and Javascript are  particularly good at this because the values in their data structures can be anything. Some programming languages require the programmer to be more specific about what they put in a data structure. There are good reasons for both, actually. In languages like Clojure the general philosophy is that the power of the flexibility is better, whereas languages that have the programmer pre-declare what will go inside a data structure are easier to build tools for that can detect certain classes of errors early.
+
+There are continuous debates about which approach is "right", and as with any such debate the answer is almost certainly "it depends". An experienced developer who has worked with both is often hard-pressed to define exactly when they would choose one over the other with objective criteria.
+
+One place where Clojure's approach has some clear wins is when representing data. The ease and clarity you can get for a relatively complex bit of data, while also ensuring a measured amount of correctness, is quite good.
+
+Consider an example. Let's try to do the exact same thing in Java and Clojure just to get an idea of the basic difference just in readability. First, Clojure:
+
+[source]
+-----
+{:person/name "Sam"
+ :person/age 22
+ :person/address {:address/street "123 Main"}}
+-----
+
+and now the Java (note the use of Object, which is how you tell Java you want to be able to
+use "anything". Technically, this is about as close to a 1-to-1 comparison of the exact same operations.
+
+[source, java]
+-----
+HashMap<Object, Object> person = new HashMap<Object,Object>();
+HashMap<Object, Object> addr = new HashMap<Object,Object>();
+person.put("person/name", "Sam");
+person.put("person/age", 22);
+person.put("person/address", addr);
+addr.put("address/street", "123 Main");
+-----
+
+However, if you were doing it the "right way", one might argue it would look like this (even this is shorter than what most Java programmers would write):
+
+[source, java]
+-----
+class Person {
+  public String name;
+  public int age;
+  public Address address;
+
+  public Person(String name, String age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public void setAddress(Address a) {this.address = a;}
+}
+
+class Address {
+  public String street;
+
+  public Address(String street) { this.street = street; }
+}
+
+...
+
+Person p = new Person("Sam", 22);
+Address a = new Address("123 Main");
+p.address = a;
+-----
+
+In other words, in languages like Java you have to "pre-define" what your data will look like in great detail (what everything will be named and what type it will have). This results in quite an explosion of detail that the programmer must write just to create some simple nested data! The other problem is that it lacks flexibility. You have to go back and change the definition if you happen to need to carry around some extra fact. Whereas in Clojure you can just put it in there whenever the need arises:
+
+[source]
+-----
+(assoc person :person/salary 10300)
+-----
+
+=== Some Examples
+
+One of the main tasks in programming is translating what you want in the real world into something that you can work on in a computer. In Clojure the ease of data nesting usually makes this relatively easy.
+
+If you need a collection of named values, you use a map.
+
+If you need a sequential collection of arbitrary things, you typically use a vector.
+
+If you need to ensure that a collection of arbitrary things is unique you usually use a set.
+
+For example, here's how you might represent a profile for a person in a dating app:
+
+[source]
+-----
+{:member/id 902
+ :member/alias "Happy Singer"
+ :member/gender :male
+ :member/birth-year 2000
+ :member/seeking #{:friends :activity-partner}
+ :member/messages [{:message/time "12:31pm"
+                    :message/recipient {:member/id 42}
+                    :message/content "Hi, how are you?"} ...]
+ :member/interests #{{:interst/label "singing"} {:interest/label "dancing"}}}
+-----
+
+Here we use sets for "seeking" and "interests" because it would be silly to accidentally claim you're seeking "friends" and "friends", or that you're interested in "singing", "dancing", and "singing". But, we choose a vector for the message history, since no two messages will be completely identical (they happen over time), and we often want to review them in that order.
+
+
 
 == Functional Programming Workhorses
 
