@@ -1408,4 +1408,17 @@ So we can use this to have reduce actually build a sequence:
 QUIZ::
 What is the output of the example? What have you seen before that this is equivalent to?
 
+== Decomposing Problems
+
+Now that you've learned the basic data and structures you're ready to start learning how to represent things in the real world. This is really the heart of programming with a language like Clojure: Decide what you need to represent, and how to organize that data for straightforward use.
+
+In my opinion, other languages which have a lot of syntax around this end up distracting you with the programming language *itself*. It can become hard to think about your problem because the data itself becomes overly complected with the notation of programming.
+
+In general, though, the approach to creating a program is to compose small bits together until you reach the solution, but you might actually find it useful to start that thinking from "one end or the other":
+
+* If you understand the large problem, you will sometimes decompose it into smaller and smaller chunks until you find units that you can reason about at the level of simple data, or a simple function. Then you write those small bits and compose them into larger ones.
+* If you're exploring the space you might *start* with the small bits you understand already, and build on that until you reach your target.
+
+In either case you need to find tractable things to build. You can't possibly attack the entire problem at once except for trivial programs. It's all divide an conquer.
+
 == Classes and Objects
