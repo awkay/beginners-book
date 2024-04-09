@@ -256,9 +256,18 @@ There"
 ;; NOTE: Make sure you ran the line above, or the following won't work!
 
 ;; EXERCISE: Put the number 42 at offset 5 in arr. See book.
+(aset arr 5 42)
+;; 5
 
 ;; EXERCISE: Get the number at offset 5 from arr. See book.
+(aget arr 5)
+;; 5
 
 ;; EXERCISE: Try putting the number 10 at offset 10. What happens? Why?
+(aset arr 10 10)
+;; error - Index 10 out of bounds for length 10
+;; array has a length of 0-9. 10 is not on there
 
 ;; EXERCISE: Try putting the number 10 at offset 0.
+(aset arr 0 10)
+;; 10
