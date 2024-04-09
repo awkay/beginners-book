@@ -208,6 +208,6 @@
 ;; EXERCISE: Wrap the above `doseq` in a function called `draw-circle`, which takes TWO parameters:
 ;; the `x-offset`, and the desired `radius`. Remember to fix your range!
 ;; Test out your new `draw-circle` function to see that you can draw various
-;; sized circles!
+;; sized circles and shift them left or right!
 
 
