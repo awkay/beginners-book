@@ -542,11 +542,12 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <li><a href="#_with_computers">1.2. With Computers</a></li>
 <li><a href="#_common_basic_data">1.3. Common Basic Data</a>
 <ul class="sectlevel3">
-<li><a href="#_integers">1.3.1. Integers</a></li>
-<li><a href="#_decimal_numbers">1.3.2. Decimal Numbers</a></li>
-<li><a href="#_characters">1.3.3. Characters</a></li>
-<li><a href="#_strings">1.3.4. Strings</a></li>
-<li><a href="#_arrays">1.3.5. Arrays</a></li>
+<li><a href="#_boolean">1.3.1. Boolean</a></li>
+<li><a href="#_integers">1.3.2. Integers</a></li>
+<li><a href="#_decimal_numbers">1.3.3. Decimal Numbers</a></li>
+<li><a href="#_characters">1.3.4. Characters</a></li>
+<li><a href="#_strings">1.3.5. Strings</a></li>
+<li><a href="#_arrays">1.3.6. Arrays</a></li>
 </ul>
 </li>
 <li><a href="#_more_advanced_data_structures">1.4. More Advanced Data Structures</a>
@@ -557,20 +558,41 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <li><a href="#_vectors">1.4.4. Vectors</a></li>
 </ul>
 </li>
-<li><a href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a>
+<li><a href="#_nesting_data">1.5. Nesting Data</a>
 <ul class="sectlevel3">
-<li><a href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></li>
-<li><a href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></li>
-<li><a href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></li>
+<li><a href="#_some_examples">1.5.1. Some Examples</a></li>
 </ul>
 </li>
-<li><a href="#_classes_and_objects">1.6. Classes and Objects</a></li>
+<li><a href="#_making_things_happen">1.6. Making Things Happen</a>
+<ul class="sectlevel3">
+<li><a href="#_the_origins_of_programming_notation">1.6.1. The origins of programming notation</a></li>
+<li><a href="#_adapting_to_programming">1.6.2. Adapting to Programming</a></li>
+</ul>
+</li>
+<li><a href="#_functional_programming_workhorses">1.7. Functional Programming Workhorses</a>
+<ul class="sectlevel3">
+<li><a href="#_mapping_a_sequence">1.7.1. Mapping a sequence</a></li>
+<li><a href="#_filtering_a_sequence">1.7.2. Filtering a Sequence</a></li>
+<li><a href="#_reducing_a_sequence">1.7.3. Reducing a Sequence</a></li>
+</ul>
+</li>
+<li><a href="#_classes_and_objects">1.8. Classes and Objects</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The intended audience of this book is people who want to learn to program, and don&#8217;t mind that the primary programming language used in this book is Clojure. The reason for this choice is mainly that it is the language I prefer to work in, and I want others to be able to learn it.</p>
+</div>
+<div class="paragraph">
+<p>The only real prerequisite is a basic understanding of simple Algebra, though even that isn&#8217;t a hard requirement. It will just make it easier for you to follow the computer science bits more clearly. But, you don&#8217;t even have to remember the quadratic equation.</p>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="_thinking_about_information"><a class="anchor" href="#_thinking_about_information"></a><a class="link" href="#_thinking_about_information">1. Thinking About Information</a></h2>
 <div class="sectionbody">
@@ -722,7 +744,39 @@ be close or identical in many programming languages.</p>
 </dl>
 </div>
 <div class="sect3">
-<h4 id="_integers"><a class="anchor" href="#_integers"></a><a class="link" href="#_integers">1.3.1. Integers</a></h4>
+<h4 id="_boolean"><a class="anchor" href="#_boolean"></a><a class="link" href="#_boolean">1.3.1. Boolean</a></h4>
+<div class="paragraph">
+<p>Basically a "true" or "false". The concept of logical truth. Booleans are common to all programming languages. The boolean type is primarily used to either track if something is true (or not), or as the result of things like comparisons which can then be used to make decisions in programs.</p>
+</div>
+<div class="paragraph">
+<p>For example, in languages list C, Java, and Javascript <code>2 &gt; 1</code> evaluates to <code>true</code> to indicate that
+indeed 2 is greater than 1.</p>
+</div>
+<div class="paragraph">
+<p>There is a surprising complication that is common to many languages, though. Most programming languages have a set of rules (for convenience) for using other values in the program in place of the pure <code>true</code> or <code>false</code>. For example in C the number 0 is considered the same as false, but all other numbers are true.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c"><span class="predefined-type">int</span> i = <span class="integer">3</span>;
+
+<span class="keyword">if</span>(i)
+  println(<span class="string"><span class="delimiter">&quot;</span><span class="content">TRUE</span><span class="delimiter">&quot;</span></span>);
+<span class="keyword">else</span>
+  println(<span class="string"><span class="delimiter">&quot;</span><span class="content">FALSE</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will print "TRUE", but if <code>i</code> were set to 0 it would print false.</p>
+</div>
+<div class="paragraph">
+<p>In Clojure, the symbols <code>true</code> and <code>false</code> are literals you can use for this purpose; however, the special value <code>nil</code> (which means no result) is considered synonymous with <code>false</code>, while every other value (including numeric 0) is considered synonymous with <code>true</code>.</p>
+</div>
+<div class="paragraph">
+<p>Basically you just have to memorize the rules for your programming language.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_integers"><a class="anchor" href="#_integers"></a><a class="link" href="#_integers">1.3.2. Integers</a></h4>
 <div class="paragraph">
 <p>Whole (signed) numbers are usually just typed as-is: 4 means 4.</p>
 </div>
@@ -784,7 +838,7 @@ many languages, NOT a decimal. Convert the bit pattern from the example in this 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_decimal_numbers"><a class="anchor" href="#_decimal_numbers"></a><a class="link" href="#_decimal_numbers">1.3.2. Decimal Numbers</a></h4>
+<h4 id="_decimal_numbers"><a class="anchor" href="#_decimal_numbers"></a><a class="link" href="#_decimal_numbers">1.3.3. Decimal Numbers</a></h4>
 <div class="paragraph">
 <p>Numbers that have a decimal point have to be stored using a different bit pattern than integers. We won&#8217;t
 cover the details of that here, but most programming languages support two different "sizes" of decimal
@@ -845,9 +899,17 @@ the representation you want.</p>
 </tr>
 </tbody>
 </table>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>In Clojure, would the value 3.22 be treated as <code>true</code> or <code>false</code> if evaluated as a boolean? What about 0?</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_characters"><a class="anchor" href="#_characters"></a><a class="link" href="#_characters">1.3.3. Characters</a></h4>
+<h4 id="_characters"><a class="anchor" href="#_characters"></a><a class="link" href="#_characters">1.3.4. Characters</a></h4>
 <div class="paragraph">
 <p>A character is a glyph (usually appearing on, or producible by a keyboard) that has some human meaning. The
 early American computers could only support the characters used in North America. The ASCII standard was
@@ -926,7 +988,7 @@ between <code>A</code> and <code>a</code>? Think about that in binary: How might
 </div>
 </div>
 <div class="sect3">
-<h4 id="_strings"><a class="anchor" href="#_strings"></a><a class="link" href="#_strings">1.3.4. Strings</a></h4>
+<h4 id="_strings"><a class="anchor" href="#_strings"></a><a class="link" href="#_strings">1.3.5. Strings</a></h4>
 <div class="paragraph">
 <p>The word "string" in computing is playing on the idea of "stringing things together". Basically a string in
 a computer is simply a linear sequence of characters, which either starts with a "length", or ends with a
@@ -1111,7 +1173,7 @@ this answer is slightly different on Windows vs. everything else (OSX, Linux, UN
 </div>
 </div>
 <div class="sect3">
-<h4 id="_arrays"><a class="anchor" href="#_arrays"></a><a class="link" href="#_arrays">1.3.5. Arrays</a></h4>
+<h4 id="_arrays"><a class="anchor" href="#_arrays"></a><a class="link" href="#_arrays">1.3.6. Arrays</a></h4>
 <div class="paragraph">
 <p>Arrays are exactly like strings (they are a sequence of things that are adjacent
 in the computer&#8217;s memory), except they are something besides characters.</p>
@@ -1780,6 +1842,18 @@ There is a recommendation if you write software in Clojure that might be used by
 <div class="paragraph">
 <p>Sets are not nearly as commonly used as maps, but they do come up with regularity.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Sets are usually unordered (you can make sorted ones if you want, but that isn&#8217;t the default).
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_vectors"><a class="anchor" href="#_vectors"></a><a class="link" href="#_vectors">1.4.4. Vectors</a></h4>
@@ -1819,12 +1893,508 @@ There is a recommendation if you write software in Clojure that might be used by
 </dl>
 </div>
 <div class="paragraph">
+<p>You can pull a value from a vector with the same function you use on maps (<code>get</code>). You just use an offset
+as the "key":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">get</span> a <span class="integer">1</span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>The exercises will let you experiment more with vectors.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_functional_programming_workhorses"><a class="anchor" href="#_functional_programming_workhorses"></a><a class="link" href="#_functional_programming_workhorses">1.5. Functional Programming Workhorses</a></h3>
+<h3 id="_nesting_data"><a class="anchor" href="#_nesting_data"></a><a class="link" href="#_nesting_data">1.5. Nesting Data</a></h3>
+<div class="paragraph">
+<p>Now that we&#8217;ve got the general idea of what data structures are, we should talk more about the fact that they can be combined with each other. Languages like Clojure and Javascript are  particularly good at this because the values in their data structures can be anything. Some programming languages require the programmer to be more specific about what they put in a data structure. There are good reasons for both, actually. In languages like Clojure the general philosophy is that the power of the flexibility is better, whereas languages that have the programmer pre-declare what will go inside a data structure are easier to build tools for that can detect certain classes of errors early.</p>
+</div>
+<div class="paragraph">
+<p>There are continuous debates about which approach is "right", and as with any such debate the answer is almost certainly "it depends". An experienced developer who has worked with both is often hard-pressed to define exactly when they would choose one over the other with objective criteria.</p>
+</div>
+<div class="paragraph">
+<p>One place where Clojure&#8217;s approach has some clear wins is when representing data. The ease and clarity you can get for a relatively complex bit of data, while also ensuring a measured amount of correctness, is quite good.</p>
+</div>
+<div class="paragraph">
+<p>Consider an example. Let&#8217;s try to do the exact same thing in Java and Clojure just to get an idea of the basic difference just in readability. First, Clojure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:person/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:person/age</span> <span class="integer">22</span>
+ <span class="symbol">:person/address</span> {<span class="symbol">:address/street</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and now the Java (note the use of Object, which is how you tell Java you want to be able to
+use "anything". Technically, this is about as close to a 1-to-1 comparison of the exact same operations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>, <span class="predefined-type">Object</span>&gt; person = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>,<span class="predefined-type">Object</span>&gt;();
+<span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>, <span class="predefined-type">Object</span>&gt; addr = <span class="keyword">new</span> <span class="predefined-type">HashMap</span>&lt;<span class="predefined-type">Object</span>,<span class="predefined-type">Object</span>&gt;();
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/name</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>);
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/age</span><span class="delimiter">&quot;</span></span>, <span class="integer">22</span>);
+person.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">person/address</span><span class="delimiter">&quot;</span></span>, addr);
+addr.put(<span class="string"><span class="delimiter">&quot;</span><span class="content">address/street</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, if you were doing it the "right way", one might argue it would look like this (even this is shorter than what most Java programmers would write):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="type">class</span> <span class="class">Person</span> {
+  <span class="directive">public</span> <span class="predefined-type">String</span> name;
+  <span class="directive">public</span> <span class="type">int</span> age;
+  <span class="directive">public</span> Address address;
+
+  <span class="directive">public</span> Person(<span class="predefined-type">String</span> name, <span class="predefined-type">String</span> age) {
+    <span class="local-variable">this</span>.name = name;
+    <span class="local-variable">this</span>.age = age;
+  }
+
+  <span class="directive">public</span> <span class="type">void</span> setAddress(Address a) {<span class="local-variable">this</span>.address = a;}
+}
+
+<span class="type">class</span> <span class="class">Address</span> {
+  <span class="directive">public</span> <span class="predefined-type">String</span> street;
+
+  <span class="directive">public</span> Address(<span class="predefined-type">String</span> street) { <span class="local-variable">this</span>.street = street; }
+}
+
+...
+
+Person p = <span class="keyword">new</span> Person(<span class="string"><span class="delimiter">&quot;</span><span class="content">Sam</span><span class="delimiter">&quot;</span></span>, <span class="integer">22</span>);
+Address a = <span class="keyword">new</span> Address(<span class="string"><span class="delimiter">&quot;</span><span class="content">123 Main</span><span class="delimiter">&quot;</span></span>);
+p.address = a;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In other words, in languages like Java you have to "pre-define" what your data will look like in great detail (what everything will be named and what type it will have). This results in quite an explosion of detail that the programmer must write just to create some simple nested data! The other problem is that it lacks flexibility. You have to go back and change the definition if you happen to need to carry around some extra fact. Whereas in Clojure you can just put it in there whenever the need arises:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">assoc</span> person <span class="symbol">:person/salary</span> <span class="integer">10300</span>)</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_some_examples"><a class="anchor" href="#_some_examples"></a><a class="link" href="#_some_examples">1.5.1. Some Examples</a></h4>
+<div class="paragraph">
+<p>One of the main tasks in programming is translating what you want in the real world into something that you can work on in a computer. In Clojure the ease of data nesting usually makes this relatively easy.</p>
+</div>
+<div class="paragraph">
+<p>If you need a collection of named values, you use a map.</p>
+</div>
+<div class="paragraph">
+<p>If you need a sequential collection of arbitrary things, you typically use a vector.</p>
+</div>
+<div class="paragraph">
+<p>If you need to ensure that a collection of arbitrary things is unique you usually use a set.</p>
+</div>
+<div class="paragraph">
+<p>For example, here&#8217;s how you might represent a profile for a person in a dating app:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:member/id</span> <span class="integer">902</span>
+ <span class="symbol">:member/alias</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Happy Singer</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:member/gender</span> <span class="symbol">:male</span>
+ <span class="symbol">:member/birth-year</span> <span class="integer">2000</span>
+ <span class="symbol">:member/seeking</span> #{<span class="symbol">:friends</span> <span class="symbol">:activity-partner</span>}
+ <span class="symbol">:member/messages</span> [{<span class="symbol">:message/time</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">12:31pm</span><span class="delimiter">&quot;</span></span>
+                    <span class="symbol">:message/recipient</span> {<span class="symbol">:member/id</span> <span class="integer">42</span>}
+                    <span class="symbol">:message/content</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Hi, how are you?</span><span class="delimiter">&quot;</span></span>} <span class="keyword">..</span><span class="keyword">.</span>]
+ <span class="symbol">:member/interests</span> #{{<span class="symbol">:interst/label</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">singing</span><span class="delimiter">&quot;</span></span>} {<span class="symbol">:interest/label</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">dancing</span><span class="delimiter">&quot;</span></span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we use sets for "seeking" and "interests" because it would be silly to accidentally claim you&#8217;re seeking "friends" and "friends", or that you&#8217;re interested in "singing", "dancing", and "singing". But, we choose a vector for the message history, since no two messages will be completely identical (they happen over time), and we often want to review them in that order.</p>
+</div>
+<div class="paragraph">
+<p>Notice how we also use keywords for some of the "values" in the data (e.g. gender and seeking). This is a very common practice when the value of a particular thing is a limited number of values. We could use strings there, but strings take more space. We could use numbers, but numbers are difficult for us as humans to remember. Keywords again strike a nice balance between usability and efficiency.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_making_things_happen"><a class="anchor" href="#_making_things_happen"></a><a class="link" href="#_making_things_happen">1.6. Making Things Happen</a></h3>
+<div class="paragraph">
+<p>Now that you understand some basic ways that we store information in computers, it is important to know not only some common operations you can do to this data, but also how to invent your own ways of manipulating data.</p>
+</div>
+<div class="sect3">
+<h4 id="_the_origins_of_programming_notation"><a class="anchor" href="#_the_origins_of_programming_notation"></a><a class="link" href="#_the_origins_of_programming_notation">1.6.1. The origins of programming notation</a></h4>
+<div class="paragraph">
+<p>Computer science is considered a branch of applied mathematics, so it makes sense that a lot of the things we end up typing into computers have their origins in math. However, in the early days computers could not show things like \$\int_0^100 x^2\$, so the notations usually rely on just what is found on a standard keyboard.</p>
+</div>
+<div class="paragraph">
+<p>From a mathematician&#8217;s perspective, the idea of taking a logical step is often written as an equation</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$y = m*x + b\$
+</div>
+</div>
+<div class="paragraph">
+<p>of course the way we work with this as algebra students is that someone hands us values for <code>m</code>, <code>x</code>, and <code>b</code>, and we punch those numbers into a calculator and get an answer.</p>
+</div>
+<div class="paragraph">
+<p>When you studied this, you probably also remember that <code>m</code> and <code>b</code> are often "known values", so that <code>x</code> is the only input. When you have this situation, you commonly write something like:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$f(x) = 12 * x + 42\$
+</div>
+</div>
+<div class="paragraph">
+<p>which essentially says "If you are given a value for <code>x</code>, here is how you would compute \$f(x)\$."</p>
+</div>
+<div class="paragraph">
+<p>In mathematics this assertion of equality is known as an equation, and technically it works both ways because of that equality. In other words, if I tell you \$f(x)\$ is 54, then you can use the rules of algebra to find the value of <code>x</code> that must be used.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_adapting_to_programming"><a class="anchor" href="#_adapting_to_programming"></a><a class="link" href="#_adapting_to_programming">1.6.2. Adapting to Programming</a></h4>
+<div class="paragraph">
+<p>When you are defining operations for a computer the end result needs to be a sequence of things that the computer can actually do. CPUs are basically not capable of much beyond moving numbers around and doing simple arithmetic.</p>
+</div>
+<div class="paragraph">
+<p>This means that there will, by simple necessity, be a difference between a "mathematical function written as a statement of equality and logical truth"  and a computer function which is a thing you type in to tell a computer a sequence of steps to take.</p>
+</div>
+<div class="paragraph">
+<p>For example, when programming in some languages you might see this seemingly puzzling thing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java">i = i + <span class="integer">1</span>;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>clearly this cannot possibly be a mathematical statement of "truth" because it is patently <strong>false</strong> in the mathematical equation sense. There is no number that would even work.</p>
+</div>
+<div class="paragraph">
+<p>Instead, the <code>=</code> is actually treated as an operation that means "Copy the result of the stuff on the right into the space on the left". It is a low-precedence operation (like in algebra where <code>*</code> goes first, then <code>+</code>. You can think of <code>=</code> as a copy operation that always goes last).</p>
+</div>
+<div class="paragraph">
+<p>So, the expression above gets interpreted into the following (abstract) CPU instructions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">READ the value of i from memory
+ADD <span class="integer">1</span> to that value
+STORE the result back in i</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now what about writing functions? Well, In some computer languages the mathematical notation is borrowed quite closely. For example in Haskell you could write the above math equation as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="haskell">f x = 12 * x + 42</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>though you are still not specifically stating a truth that the program can "work backwards" on (I can&#8217;t ask Haskell to compute x if I give it f(x)). The notation is simply a convenient way of letting the programmer write something close to familiar. The end result is still the generaion of some code that takes <code>x</code> as <strong>input</strong> and gives the calculation as <strong>output</strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+There are <a href="https://en.wikipedia.org/wiki/List_of_computer_algebra_systems">Computer Algebra Systems</a> that <strong>do</strong> allow you to write real mathematical statements which can then be abstractly manipulated or solved in the mathematical sense. These are not considered "general purpose" programming languages for general software development because they are not very useful for that task. Most programs need to essentially generate sequences of computational steps that lead to a targeted result, and having to state that process in pure mathematics would often be <strong>very</strong> difficult.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In Clojure, programs are always written using data structure, so the notation is a little different just because we have to encode the program <strong>itself</strong> as data (functions are defined using lists and vectors):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">f</span> [x]
+  (<span class="keyword">+</span> (<span class="keyword">*</span> <span class="integer">12</span> x) <span class="integer">42</span>))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>defn</code> is meant to be read as "Define a function". So you&#8217;d read the entire first line as "Define a function named <code>f</code>, which takes a single parameter that we&#8217;ll call <code>x</code>…"</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Can you think of some good reasons why encoding a program as data might be advantageous?</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In Clojure a raw list (something surrounded by regular parentheses) is a request for action. The first thing in a list is always the "action to take" and the remaining items in the list are the data to be passed into the function. Back in the data section you noticed that in order to create a list we had to say <code>(list 1 2 3)</code>. Technically, this is a list that Clojure is running, and the operation <code>list</code> means "make a list". This is the main difference between Clojure programs as <strong>data structures</strong> and the programming languages runtime evaluation of the data structures. A raw list in Clojure is explicitly defined as the way to "make things happen".
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Try running <code>(1 2 3)</code> in a REPL. What happens? Explain this result to the best of your ability.</p>
+</dd>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>Try running <code>({:x 1} :x)</code> in a REPL. What happens? Given what you&#8217;ve learned so far, what would you say about maps in Clojure?</p>
+</dd>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>Same as the prior question, but try running <code>(:x {:x 1})</code> instead. What does this say about keywords?</p>
+</dd>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>What do you suppose will happen if you replace the map with a vector, and :x with a number? E.g. <code>([4 5 6] 0)</code>. Try it (in both orders). What does this say about vectors and integers?</p>
+</dd>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>Any theories on how sets might behave? Give it a shot!</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>In Javascript it would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript"><span class="keyword">function</span> <span class="function">f</span>(x) {
+  <span class="keyword">return</span> <span class="integer">12</span> * x + <span class="integer">42</span>;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and in Java/C/C++:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="type">double</span> f(<span class="type">double</span> x) {
+    <span class="keyword">return</span> <span class="integer">12</span> * x + <span class="integer">42</span>;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>notice that in this last version has to specifically declare that the function itself will evaluate to a double (that&#8217;s what the <code>double</code> in front is saying), and you have to say what kind of data the <code>x</code> is.</p>
+</div>
+<div class="paragraph">
+<p>These last two definitions also use the special word <code>return</code> in them. In these programming languages the code in a function must explicitly say when it is done and wants to send back a value. If the function "ends" without a return, then it is considered an error and the program will not work. Similarly, this is nonsensical:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c"><span class="predefined-type">int</span> f(<span class="predefined-type">int</span> x) {
+  <span class="keyword">return</span> x;
+  x + <span class="integer">1</span>;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>because the return exits the function, and the last statement is "unreachable".</p>
+</div>
+<div class="paragraph">
+<p>So these languages tend to more heavily expose the fact (to the programmer) that they are actually a way of asking the computer to take some steps to perform a calculation. "Take a double precision floating point number, and call it x, then mutiply it by 12, and add 42. Then return that result the caller."</p>
+</div>
+<div class="paragraph">
+<p>Languages like Haskell and Clojure use a notation that treats functions a little more like the mathematical construct, where the expression itself becomes the "result" of the function.</p>
+</div>
+<div class="paragraph">
+<p>Technically, in Clojure, the <strong>last</strong> expression inside the function becomes its value. For example, this is legal (though silly):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">f</span> [x]
+  x
+  (<span class="keyword">+</span> x <span class="integer">1</span>)
+  (<span class="keyword">+</span> (<span class="keyword">*</span> x <span class="integer">12</span>) <span class="integer">42</span>))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first two <em>forms</em> (<code>x</code> and <code>(+ x 1)</code>) are understood by the language, but they are not the "last" form in the body of the function, so they are essentially useless noise that might be computed, but have no other effect because their values are never seen/used.</p>
+</div>
+<div class="paragraph">
+<p>By the way, the definition of a <em>form</em> in Clojure is a structurally complete unit of code, which is contextual. For example a simple name like <code>x</code> or the symbol <code>defn</code> are forms. But so is the vector <code>[x]</code> (because it has matching open and close brackets). So, one would say that the body of <code>f</code> above contains 3 forms. The first form is a simple symbol, the second is a list containing three sub-forms, and the last one is a form that contains 3 forms, the middle of which is a form that has 3 subforms.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>If the values of the first two forms in the body of <code>f</code> are not used as part of the "answer" of the function, why can we even put them there?</p>
+</dd>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>What are the various "forms" in the following expression? Hint, there are 6.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">+</span> (<span class="keyword">*</span> x y))</code></pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Since we are focusing on Clojure, we also want to mention that functions can be treated as values. That is to say they can be used as an argument to another function, or even returned from a function. As such, there is a way to "create a function" that has no name, and is created on-the-fly. Basically you just drop the <code>de</code> of <code>defn</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">fn</span> [x] (<span class="keyword">+</span> (<span class="keyword">*</span> x <span class="integer">12</span>) <span class="integer">42</span>))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a very odd thing to do all by itself (with what you know so far), but we can still give such things a reusable name:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">f</span> (<span class="keyword">fn</span> [x] (<span class="keyword">+</span> (<span class="keyword">*</span> x <span class="integer">12</span>) <span class="integer">42</span>)))</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The above is, in fact, nearly exactly what <code>defn</code> does. It&#8217;s just a bit noisy. If you review the exercises from the data structures, you&#8217;ll remember that the <code>update</code> function could take an arbitrary operation when working on a map entry.
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Given our definition of <code>f</code>, what do you think this does?</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(update {<span class="symbol">:x</span> <span class="integer">2</span>} <span class="symbol">:x</span> f)</code></pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Functions like <code>update</code> are referred to as <em>higher-order</em> functions. A higher-order function is just a function that accepts a function as a <em>parameter</em>, and/or <em>returns</em> a function as its result.</p>
+</div>
+<div class="paragraph">
+<p>If we were talking about this with mathematics, one might write:</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$f(g)(x) = 3 * g(x)\$
+</div>
+</div>
+<div class="paragraph">
+<p>where the expectation is that one might define some function <code>g</code> and value <code>x</code> for which the equation then takes effect.</p>
+</div>
+<div class="stemblock">
+<div class="content">
+\$"Let " g(x) = x + 5", then"\$
+<br>
+\$f(g)(10) = 18\$
+</div>
+</div>
+<div class="paragraph">
+<p>We can express this exact thing in Clojure as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">f</span> [g x]
+  (<span class="keyword">*</span> <span class="integer">3</span> (g x)))
+
+(<span class="keyword">let</span> [g (<span class="keyword">fn</span> [x] (<span class="keyword">+</span> x <span class="integer">5</span>))]
+  (f g <span class="integer">10</span>))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s another interesting example. Say we wanted a function that would <em>generate</em> new functions for the slope-intercept equation (\$f(x) = m*x+b\$). In other words we want to give the inputs <code>m</code> and <code>b</code>, and get back a function that can be used to calculate points on a line.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">BONUS</dt>
+<dd>
+<p>Try writing the function described above before looking at the answer below.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The answer is that we make a function whose <strong>result</strong> is an anonymous function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">line-equation</span> [m b]
+  (<span class="keyword">fn</span> [x] (<span class="keyword">+</span> (<span class="keyword">*</span> m x) b)))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and then we can use it to make new functions like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">def</span> <span class="function">line1</span> (line-equation <span class="integer">10</span> <span class="integer">30</span>))
+(<span class="keyword">def</span> <span class="function">line2</span> (line-equation <span class="integer">5</span> <span class="integer">12</span>))
+
+(line1 <span class="integer">30</span>) <span class="comment">; compute the y for x = 30 of y = 10x + 30.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or even:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">((line-equation <span class="integer">2</span> <span class="integer">4</span>) <span class="integer">9</span>)</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Explain what the above expression does.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Higher-order functions are the bread and butter of programming in languages like Clojure.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Given the above definitions, what would this do?</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(update {<span class="symbol">:x</span> <span class="integer">1</span>} <span class="symbol">:x</span> line1)</code></pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Most programming languages these days have the ability to create and use higher-order functions. Technically even many of the older ones do as well, though it was considered a much more advanced and difficult technique. The idea has been around since pretty much the early days of computing, but in those days the languages that advocated their use were slow and impractical. Advances in computer science and computer hardware have made the definition and use of higher-order functions a much more mainstream practice, and you&#8217;ll regularly see them in Java, Javascript, Typescript, and other mainstream languages.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_functional_programming_workhorses"><a class="anchor" href="#_functional_programming_workhorses"></a><a class="link" href="#_functional_programming_workhorses">1.7. Functional Programming Workhorses</a></h3>
 <div class="paragraph">
 <p>Functional programming languages leverage the idea of sequences quite a bit. Sequences
 of operations, sequences of values, etc. The actual underlying data structure could
@@ -1855,7 +2425,7 @@ match some condition.</p>
 </dl>
 </div>
 <div class="sect3">
-<h4 id="_mapping_a_sequence"><a class="anchor" href="#_mapping_a_sequence"></a><a class="link" href="#_mapping_a_sequence">1.5.1. Mapping a sequence</a></h4>
+<h4 id="_mapping_a_sequence"><a class="anchor" href="#_mapping_a_sequence"></a><a class="link" href="#_mapping_a_sequence">1.7.1. Mapping a sequence</a></h4>
 <div class="paragraph">
 <p>Mapping a sequence is a very simple operation that can be described like this:</p>
 </div>
@@ -1897,7 +2467,7 @@ sequence of numbers, you can use <code>map</code>:</p>
 </div>
 <div class="paragraph">
 <p>It turns out that clojure can accept more than one sequence for map, and you can just increase
-the number of arguments to the function. In this case ALL of the sequences are walked together,
+the number of arguments to the function. In this case ALL the sequences are walked together,
 giving the corresponding elements to the function. For example:</p>
 </div>
 <div class="listingblock">
@@ -1915,7 +2485,7 @@ giving the corresponding elements to the function. For example:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_filtering_a_sequence"><a class="anchor" href="#_filtering_a_sequence"></a><a class="link" href="#_filtering_a_sequence">1.5.2. Filtering a Sequence</a></h4>
+<h4 id="_filtering_a_sequence"><a class="anchor" href="#_filtering_a_sequence"></a><a class="link" href="#_filtering_a_sequence">1.7.2. Filtering a Sequence</a></h4>
 <div class="paragraph">
 <p>Very often an input sequence will contain values that you want, and those you do not. The point of
 filtering a sequence therefore is defined to look basically like this:</p>
@@ -1946,7 +2516,7 @@ filtering a sequence therefore is defined to look basically like this:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_reducing_a_sequence"><a class="anchor" href="#_reducing_a_sequence"></a><a class="link" href="#_reducing_a_sequence">1.5.3. Reducing a Sequence</a></h4>
+<h4 id="_reducing_a_sequence"><a class="anchor" href="#_reducing_a_sequence"></a><a class="link" href="#_reducing_a_sequence">1.7.3. Reducing a Sequence</a></h4>
 <div class="paragraph">
 <p>Reduce is a real powerhouse operation. Mathematically, the idea is very simple. The inputs
 are:</p>
@@ -2067,7 +2637,7 @@ just adds an element to the end of a vector. For example,
 </div>
 </div>
 <div class="sect2">
-<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.6. Classes and Objects</a></h3>
+<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.8. Classes and Objects</a></h3>
 
 </div>
 </div>
@@ -2075,8 +2645,32 @@ just adds an element to the end of a vector. For example,
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-28 20:25:45 -0700
+Last updated 2024-03-29 13:33:58 -0700
 </div>
 </div>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  messageStyle: "none",
+  tex2jax: {
+    inlineMath: [["\\(", "\\)"]],
+    displayMath: [["\\[", "\\]"]],
+    ignoreClass: "nostem|nolatexmath"
+  },
+  asciimath2jax: {
+    delimiters: [["\\$", "\\$"]],
+    ignoreClass: "nostem|noasciimath"
+  },
+  TeX: { equationNumbers: { autoNumber: "none" } }
+})
+MathJax.Hub.Register.StartupHook("AsciiMath Jax Ready", function () {
+  MathJax.InputJax.AsciiMath.postfilterHooks.Add(function (data, node) {
+    if ((node = data.script.parentNode) && (node = node.parentNode) && node.classList.contains("stemblock")) {
+      data.math.root.display = "block"
+    }
+    return data
+  })
+})
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_HTMLorMML"></script>
 </body>
 </html>

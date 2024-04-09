@@ -28,6 +28,10 @@ ifdef::env-github[]
 toc::[]
 endif::[]
 
+The intended audience of this book is people who want to learn to program, and don't mind that the primary programming language used in this book is Clojure. The reason for this choice is mainly that it is the language I prefer to work in, and I want others to be able to learn it.
+
+The only real prerequisite is a basic understanding of simple Algebra, though even that isn't a hard requirement. It will just make it easier for you to follow the computer science bits more clearly. But, you don't even have to remember the quadratic equation.
+
 = Thinking About Information
 
 == Without Computers
@@ -105,6 +109,31 @@ Since different programming languages have different things you might "type" in 
 you imagine that many of these languages would share some commonalities? Name some that you would expect to
 be close or identical in many programming languages.
 
+=== Boolean
+
+Basically a "true" or "false". The concept of logical truth. Booleans are common to all programming languages. The boolean type is primarily used to either track if something is true (or not), or as the result of things like comparisons which can then be used to make decisions in programs.
+
+For example, in languages list C, Java, and Javascript `2 > 1` evaluates to `true` to indicate that
+indeed 2 is greater than 1.
+
+There is a surprising complication that is common to many languages, though. Most programming languages have a set of rules (for convenience) for using other values in the program in place of the pure `true` or `false`. For example in C the number 0 is considered the same as false, but all other numbers are true.
+
+[source, c]
+-----
+int i = 3;
+
+if(i)
+  println("TRUE");
+else
+  println("FALSE");
+-----
+
+will print "TRUE", but if `i` were set to 0 it would print false.
+
+In Clojure, the symbols `true` and `false` are literals you can use for this purpose; however, the special value `nil` (which means no result) is considered synonymous with `false`, while every other value (including numeric 0) is considered synonymous with `true`.
+
+Basically you just have to memorize the rules for your programming language.
+
 === Integers
 
 Whole (signed) numbers are usually just typed as-is: 4 means 4.
@@ -165,6 +194,9 @@ the representation you want.
 | Java | 3.5f  | float
 | Javascript | 3.5  | double (no way to get float)
 |====
+
+QUIZ::
+In Clojure, would the value 3.22 be treated as `true` or `false` if evaluated as a boolean? What about 0?
 
 === Characters
 
@@ -789,6 +821,8 @@ which returns true if the item is in the set, and false otherwise.  There are, o
 
 Sets are not nearly as commonly used as maps, but they do come up with regularity.
 
+NOTE: Sets are usually unordered (you can make sorted ones if you want, but that isn't the default).
+
 === Vectors
 
 Clojure has an additional type that is similar in behavior to an array called a `vector`.  Internally it has a rather complex implementation that is meant to give performance that gets reasonably close to that of an array, with none of the drawbacks, all while have that same immutable guarantee that all the other Clojure data structures have!
@@ -816,7 +850,365 @@ What's in `a` after this code runs?
 QUIZ::
 What's in `b` after this code runs?
 
+You can pull a value from a vector with the same function you use on maps (`get`). You just use an offset
+as the "key":
+
+[source]
+-----
+(get a 1)
+-----
+
 The exercises will let you experiment more with vectors.
+
+== Nesting Data
+
+Now that we've got the general idea of what data structures are, we should talk more about the fact that they can be combined with each other. Languages like Clojure and Javascript are  particularly good at this because the values in their data structures can be anything. Some programming languages require the programmer to be more specific about what they put in a data structure. There are good reasons for both, actually. In languages like Clojure the general philosophy is that the power of the flexibility is better, whereas languages that have the programmer pre-declare what will go inside a data structure are easier to build tools for that can detect certain classes of errors early.
+
+There are continuous debates about which approach is "right", and as with any such debate the answer is almost certainly "it depends". An experienced developer who has worked with both is often hard-pressed to define exactly when they would choose one over the other with objective criteria.
+
+One place where Clojure's approach has some clear wins is when representing data. The ease and clarity you can get for a relatively complex bit of data, while also ensuring a measured amount of correctness, is quite good.
+
+Consider an example. Let's try to do the exact same thing in Java and Clojure just to get an idea of the basic difference just in readability. First, Clojure:
+
+[source]
+-----
+{:person/name "Sam"
+ :person/age 22
+ :person/address {:address/street "123 Main"}}
+-----
+
+and now the Java (note the use of Object, which is how you tell Java you want to be able to
+use "anything". Technically, this is about as close to a 1-to-1 comparison of the exact same operations.
+
+[source, java]
+-----
+HashMap<Object, Object> person = new HashMap<Object,Object>();
+HashMap<Object, Object> addr = new HashMap<Object,Object>();
+person.put("person/name", "Sam");
+person.put("person/age", 22);
+person.put("person/address", addr);
+addr.put("address/street", "123 Main");
+-----
+
+However, if you were doing it the "right way", one might argue it would look like this (even this is shorter than what most Java programmers would write):
+
+[source, java]
+-----
+class Person {
+  public String name;
+  public int age;
+  public Address address;
+
+  public Person(String name, String age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public void setAddress(Address a) {this.address = a;}
+}
+
+class Address {
+  public String street;
+
+  public Address(String street) { this.street = street; }
+}
+
+...
+
+Person p = new Person("Sam", 22);
+Address a = new Address("123 Main");
+p.address = a;
+-----
+
+In other words, in languages like Java you have to "pre-define" what your data will look like in great detail (what everything will be named and what type it will have). This results in quite an explosion of detail that the programmer must write just to create some simple nested data! The other problem is that it lacks flexibility. You have to go back and change the definition if you happen to need to carry around some extra fact. Whereas in Clojure you can just put it in there whenever the need arises:
+
+[source]
+-----
+(assoc person :person/salary 10300)
+-----
+
+=== Some Examples
+
+One of the main tasks in programming is translating what you want in the real world into something that you can work on in a computer. In Clojure the ease of data nesting usually makes this relatively easy.
+
+If you need a collection of named values, you use a map.
+
+If you need a sequential collection of arbitrary things, you typically use a vector.
+
+If you need to ensure that a collection of arbitrary things is unique you usually use a set.
+
+For example, here's how you might represent a profile for a person in a dating app:
+
+[source]
+-----
+{:member/id 902
+ :member/alias "Happy Singer"
+ :member/gender :male
+ :member/birth-year 2000
+ :member/seeking #{:friends :activity-partner}
+ :member/messages [{:message/time "12:31pm"
+                    :message/recipient {:member/id 42}
+                    :message/content "Hi, how are you?"} ...]
+ :member/interests #{{:interst/label "singing"} {:interest/label "dancing"}}}
+-----
+
+Here we use sets for "seeking" and "interests" because it would be silly to accidentally claim you're seeking "friends" and "friends", or that you're interested in "singing", "dancing", and "singing". But, we choose a vector for the message history, since no two messages will be completely identical (they happen over time), and we often want to review them in that order.
+
+Notice how we also use keywords for some of the "values" in the data (e.g. gender and seeking). This is a very common practice when the value of a particular thing is a limited number of values. We could use strings there, but strings take more space. We could use numbers, but numbers are difficult for us as humans to remember. Keywords again strike a nice balance between usability and efficiency.
+
+== Making Things Happen
+
+Now that you understand some basic ways that we store information in computers, it is important to know not only some common operations you can do to this data, but also how to invent your own ways of manipulating data.
+
+=== The origins of programming notation
+
+Computer science is considered a branch of applied mathematics, so it makes sense that a lot of the things we end up typing into computers have their origins in math. However, in the early days computers could not show things like stem:[\int_0^100 x^2], so the notations usually rely on just what is found on a standard keyboard.
+
+From a mathematician's perspective, the idea of taking a logical step is often written as an equation
+
+[stem]
+++++
+y = m*x + b
+++++
+
+of course the way we work with this as algebra students is that someone hands us values for `m`, `x`, and `b`, and we punch those numbers into a calculator and get an answer.
+
+When you studied this, you probably also remember that `m` and `b` are often "known values", so that `x` is the only input. When you have this situation, you commonly write something like:
+
+[stem]
+++++
+f(x) = 12 * x + 42
+++++
+
+which essentially says "If you are given a value for `x`, here is how you would compute stem:[f(x)]."
+
+In mathematics this assertion of equality is known as an equation, and technically it works both ways because of that equality. In other words, if I tell you stem:[f(x)] is 54, then you can use the rules of algebra to find the value of `x` that must be used.
+
+=== Adapting to Programming
+
+When you are defining operations for a computer the end result needs to be a sequence of things that the computer can actually do. CPUs are basically not capable of much beyond moving numbers around and doing simple arithmetic.
+
+This means that there will, by simple necessity, be a difference between a "mathematical function written as a statement of equality and logical truth"  and a computer function which is a thing you type in to tell a computer a sequence of steps to take.
+
+For example, when programming in some languages you might see this seemingly puzzling thing:
+
+[source, java]
+-----
+i = i + 1;
+-----
+
+clearly this cannot possibly be a mathematical statement of "truth" because it is patently *false* in the mathematical equation sense. There is no number that would even work.
+
+Instead, the `=` is actually treated as an operation that means "Copy the result of the stuff on the right into the space on the left". It is a low-precedence operation (like in algebra where `*` goes first, then `+`. You can think of `=` as a copy operation that always goes last).
+
+So, the expression above gets interpreted into the following (abstract) CPU instructions:
+
+[source]
+-----
+READ the value of i from memory
+ADD 1 to that value
+STORE the result back in i
+-----
+
+Now what about writing functions? Well, In some computer languages the mathematical notation is borrowed quite closely. For example in Haskell you could write the above math equation as:
+
+[source, haskell]
+-----
+f x = 12 * x + 42
+-----
+
+though you are still not specifically stating a truth that the program can "work backwards" on (I can't ask Haskell to compute x if I give it f(x)). The notation is simply a convenient way of letting the programmer write something close to familiar. The end result is still the generaion of some code that takes `x` as *input* and gives the calculation as *output*.
+
+NOTE: There are https://en.wikipedia.org/wiki/List_of_computer_algebra_systems[Computer Algebra Systems] that *do* allow you to write real mathematical statements which can then be abstractly manipulated or solved in the mathematical sense. These are not considered "general purpose" programming languages for general software development because they are not very useful for that task. Most programs need to essentially generate sequences of computational steps that lead to a targeted result, and having to state that process in pure mathematics would often be *very* difficult.
+
+In Clojure, programs are always written using data structure, so the notation is a little different just because we have to encode the program *itself* as data (functions are defined using lists and vectors):
+
+[source]
+-----
+(defn f [x]
+  (+ (* 12 x) 42))
+-----
+
+where `defn` is meant to be read as "Define a function". So you'd read the entire first line as "Define a function named `f`, which takes a single parameter that we'll call `x`…"
+
+QUIZ::
+Can you think of some good reasons why encoding a program as data might be advantageous?
+
+NOTE: In Clojure a raw list (something surrounded by regular parentheses) is a request for action. The first thing in a list is always the "action to take" and the remaining items in the list are the data to be passed into the function. Back in the data section you noticed that in order to create a list we had to say `(list 1 2 3)`. Technically, this is a list that Clojure is running, and the operation `list` means "make a list". This is the main difference between Clojure programs as *data structures* and the programming languages runtime evaluation of the data structures. A raw list in Clojure is explicitly defined as the way to "make things happen".
+
+QUIZ::
+Try running `(1 2 3)` in a REPL. What happens? Explain this result to the best of your ability.
+
+BONUS::
+Try running `({:x 1} :x)` in a REPL. What happens? Given what you've learned so far, what would you say about maps in Clojure?
+
+BONUS::
+Same as the prior question, but try running `(:x {:x 1})` instead. What does this say about keywords?
+
+BONUS::
+What do you suppose will happen if you replace the map with a vector, and :x with a number? E.g. `([4 5 6] 0)`. Try it (in both orders). What does this say about vectors and integers?
+
+BONUS::
+Any theories on how sets might behave? Give it a shot!
+
+In Javascript it would be:
+
+[source, javascript]
+-----
+function f(x) {
+  return 12 * x + 42;
+}
+-----
+
+and in Java/C/C++:
+
+[source, java]
+-----
+double f(double x) {
+    return 12 * x + 42;
+}
+-----
+
+notice that in this last version has to specifically declare that the function itself will evaluate to a double (that's what the `double` in front is saying), and you have to say what kind of data the `x` is.
+
+These last two definitions also use the special word `return` in them. In these programming languages the code in a function must explicitly say when it is done and wants to send back a value. If the function "ends" without a return, then it is considered an error and the program will not work. Similarly, this is nonsensical:
+
+[source, c]
+-----
+int f(int x) {
+  return x;
+  x + 1;
+}
+-----
+
+because the return exits the function, and the last statement is "unreachable".
+
+So these languages tend to more heavily expose the fact (to the programmer) that they are actually a way of asking the computer to take some steps to perform a calculation. "Take a double precision floating point number, and call it x, then mutiply it by 12, and add 42. Then return that result the caller."
+
+Languages like Haskell and Clojure use a notation that treats functions a little more like the mathematical construct, where the expression itself becomes the "result" of the function.
+
+Technically, in Clojure, the *last* expression inside the function becomes its value. For example, this is legal (though silly):
+
+[source]
+-----
+(defn f [x]
+  x
+  (+ x 1)
+  (+ (* x 12) 42))
+-----
+
+The first two _forms_ (`x` and `(+ x 1)`) are understood by the language, but they are not the "last" form in the body of the function, so they are essentially useless noise that might be computed, but have no other effect because their values are never seen/used.
+
+By the way, the definition of a _form_ in Clojure is a structurally complete unit of code, which is contextual. For example a simple name like `x` or the symbol `defn` are forms. But so is the vector `[x]` (because it has matching open and close brackets). So, one would say that the body of `f` above contains 3 forms. The first form is a simple symbol, the second is a list containing three sub-forms, and the last one is a form that contains 3 forms, the middle of which is a form that has 3 subforms.
+
+QUIZ::
+If the values of the first two forms in the body of `f` are not used as part of the "answer" of the function, why can we even put them there?
+
+QUIZ::
+What are the various "forms" in the following expression? Hint, there are 6.
++
+[source]
+-----
+(+ (* x y))
+-----
+
+Since we are focusing on Clojure, we also want to mention that functions can be treated as values. That is to say they can be used as an argument to another function, or even returned from a function. As such, there is a way to "create a function" that has no name, and is created on-the-fly. Basically you just drop the `de` of `defn`:
+
+[source]
+-----
+(fn [x] (+ (* x 12) 42))
+-----
+
+This is a very odd thing to do all by itself (with what you know so far), but we can still give such things a reusable name:
+
+[source]
+-----
+(def f (fn [x] (+ (* x 12) 42)))
+-----
+
+NOTE: The above is, in fact, nearly exactly what `defn` does. It's just a bit noisy. If you review the exercises from the data structures, you'll remember that the `update` function could take an arbitrary operation when working on a map entry.
+
+QUIZ::
+Given our definition of `f`, what do you think this does?
++
+[source]
+-----
+(update {:x 2} :x f)
+-----
+
+Functions like `update` are referred to as _higher-order_ functions. A higher-order function is just a function that accepts a function as a _parameter_, and/or _returns_ a function as its result.
+
+If we were talking about this with mathematics, one might write:
+
+[stem]
+++++
+f(g)(x) = 3 * g(x)
+++++
+
+where the expectation is that one might define some function `g` and value `x` for which the equation then takes effect.
+
+[stem]
+++++
+"Let " g(x) = x + 5", then"
+
+f(g)(10) = 18
+++++
+
+We can express this exact thing in Clojure as:
+
+[source]
+-----
+(defn f [g x]
+  (* 3 (g x)))
+
+(let [g (fn [x] (+ x 5))]
+  (f g 10))
+-----
+
+Here's another interesting example. Say we wanted a function that would _generate_ new functions for the slope-intercept equation (stem:[f(x) = m*x+b]). In other words we want to give the inputs `m` and `b`, and get back a function that can be used to calculate points on a line.
+
+BONUS::
+Try writing the function described above before looking at the answer below.
+
+The answer is that we make a function whose *result* is an anonymous function:
+
+[source]
+-----
+(defn line-equation [m b]
+  (fn [x] (+ (* m x) b)))
+-----
+
+and then we can use it to make new functions like this:
+
+[source]
+-----
+(def line1 (line-equation 10 30))
+(def line2 (line-equation 5 12))
+
+(line1 30) ; compute the y for x = 30 of y = 10x + 30.
+-----
+
+or even:
+
+[source]
+-----
+((line-equation 2 4) 9)
+-----
+
+QUIZ::
+Explain what the above expression does.
+
+Higher-order functions are the bread and butter of programming in languages like Clojure.
+
+QUIZ::
+Given the above definitions, what would this do?
++
+[source]
+-----
+(update {:x 1} :x line1)
+-----
+
+NOTE: Most programming languages these days have the ability to create and use higher-order functions. Technically even many of the older ones do as well, though it was considered a much more advanced and difficult technique. The idea has been around since pretty much the early days of computing, but in those days the languages that advocated their use were slow and impractical. Advances in computer science and computer hardware have made the definition and use of higher-order functions a much more mainstream practice, and you'll regularly see them in Java, Javascript, Typescript, and other mainstream languages.
 
 == Functional Programming Workhorses
 
@@ -885,7 +1277,7 @@ sequence of numbers, you can use `map`:
 -----
 
 It turns out that clojure can accept more than one sequence for map, and you can just increase
-the number of arguments to the function. In this case ALL of the sequences are walked together,
+the number of arguments to the function. In this case ALL the sequences are walked together,
 giving the corresponding elements to the function. For example:
 
 [source]
@@ -1015,5 +1407,18 @@ So we can use this to have reduce actually build a sequence:
 
 QUIZ::
 What is the output of the example? What have you seen before that this is equivalent to?
+
+== Decomposing Problems
+
+Now that you've learned the basic data and structures you're ready to start learning how to represent things in the real world. This is really the heart of programming with a language like Clojure: Decide what you need to represent, and how to organize that data for straightforward use.
+
+In my opinion, other languages which have a lot of syntax around this end up distracting you with the programming language *itself*. It can become hard to think about your problem because the data itself becomes overly complected with the notation of programming.
+
+In general, though, the approach to creating a program is to compose small bits together until you reach the solution, but you might actually find it useful to start that thinking from "one end or the other":
+
+* If you understand the large problem, you will sometimes decompose it into smaller and smaller chunks until you find units that you can reason about at the level of simple data, or a simple function. Then you write those small bits and compose them into larger ones.
+* If you're exploring the space you might *start* with the small bits you understand already, and build on that until you reach your target.
+
+In either case you need to find tractable things to build. You can't possibly attack the entire problem at once except for trivial programs. It's all divide an conquer.
 
 == Classes and Objects
