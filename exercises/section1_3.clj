@@ -236,10 +236,13 @@ There"
 ;;Not sure which is best answer here:
 (str "Hello "(char 49)(char 50)(char 51))
 ;; WRONG
+;; ;; This is what you were looking for in unicode land to make '123':
+(str \u0031 \u0032 \u0033)
 
 (str \H \e \l \l \o " " \1 " " \2 " " \3)
 ;; ^ is answer
-
+(str \H \e \l \l \o`\ `\1 `\ `\2 `\ `\3)
+;; this also applies
 
 ;; EXERCISE: Review https://clojure.org/guides/weird_characters and see if you can do the prior exercise in a more
 ;; readably way.
