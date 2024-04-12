@@ -1612,11 +1612,14 @@ How do we solve this in the real world? Well, aside from cloning, we refer to th
      :character/friends [2]}} ; 2 points to Vlad Jr.
 -----
 
+== Normalization
+
 This process of de-duplicating data by using references is known as *normalization* of the data. There's a whole branch of computer science dedicated to the study of it in the context of databases, but the core thing that you need to understand is this idea of replacing a thing with a reference to that thing.
 
 Now, we have one more problem to solve: we often do not use unique IDs. In our example so far we've been reusing numbers when the "type" of the thing in question is different. So, our references in the above draft are a bit *ambiguous*. We can kind of figure it out by looking at the key (e.g. we humans can guess that `:character/friends` probably points to other characters, but that isn't going to be obvious to everyone, and it certainly won't help the computer).
 
-So, we have one final leap to make: What if a reference is just a vector of the `[ID-key ID]`. Like `[:character/id 1]`. If we choose that as a convention, we would evolve things to this:
+So, we have one final leap to make: What if we choose to make a reference as a vector of the `[ID-key ID]`.
+Like `[:character/id 1]`. If we do that, the result would evolve to this:
 
 [source]
 -----
@@ -1661,7 +1664,7 @@ ok, so now you might notice something. This proposed reference format is *exactl
                      :character/name "Doug Adams"}}}
 -----
 
-because now if I know the reference(s), I can just look them up against the top-level character map with `get-in`. Want to make a modification to a character, it's just something like an `(assoc-in characters [:character/id ID :character/name] "Sally")`. The paths are now "relatively" shallow for any update we can think of.
+because now if I know the reference(s), I can just look them up against the top-level map with `get-in`! Want to make a modification to a character? It's just something like an `(assoc-in m [:character/id ID :character/name] "Sally")`.  The paths are nice and short!
 
 Now look at all the other nested data like skills and inventory. This same trick can be played there!
 
@@ -1686,7 +1689,7 @@ Now look at all the other nested data like skills and inventory. This same trick
                2 {:item/id 2 ...}}}
 -----
 
-Now if we want to know the value of any kind of thing, it is just generally `(get-in data [id-key id])`. If we want to change some attribute it's either an `assoc-in` or `update-in` along a similar path: `(assoc-in data [id-key id attribute-key] new-value)`.
+Now if we want to know any fact on an entity, it is just generally `(get-in data [id-key id attribute-key])`. If we want to change some attribute it's either an `assoc-in` or `update-in` along a similar path: `(assoc-in data [id-key id attribute-key] new-value)`.
 
 So, this seems an overall good generalization for how to represent arbitrarily complex nested data!
 
@@ -1732,10 +1735,10 @@ Of course nothing is perfect. The main problem with this structure is that there
 However, there's nothing to say that you can't create a "back-reference". In other words, a reference that points to the "owner" of something. For example: `{:item/owner [:character/id 4]}`.
 
 QUIZ::
-Before reading on, try to name a problem with having back references.
+Before reading on, try to name a problem with *having* back references.
 
-To see why this isn't commonly done, let's see the data evolve over time. Say at one point in the game Vlad aka Sally has the Sword of Destiny, which
-has a back-reference:
+To see why this isn't commonly done, let's see the data evolve over time. Say at one point in the game Vlad has the Sword of Destiny, which
+in turn has a back-reference back to Vlad:
 
 [source]
 -----
@@ -1744,7 +1747,7 @@ has a back-reference:
               :item/owner [:character/id 1]}}
 -----
 
-and Vlad decides to give this sword to their sidekick. If the logic of the program isn't perfect, it could be easy to *forget* to update the back reference, leading to something inconsistent like this:
+When Vlad decides to give this sword to their sidekick, if the logic of the program isn't perfect, it could be easy to *forget* to update the back reference, leading to something inconsistent like this:
 
 [source]
 -----
@@ -1756,4 +1759,34 @@ and Vlad decides to give this sword to their sidekick. If the logic of the progr
 
 clearly character 2 now has item 1 in their inventory, but the item didn't get updated so if you were asking the question "who owns the Sword of Destiny" the program would likely use this back-reference and give the wrong answer!
 
-So, generally if you need to find things "in reverse" (fortunately you rarely do), it's usually a matter of writing code that can search for it. For example, look through all character's inventories until you find `[:item/id 1]`. Fortunately, it isn't all that terribly hard to write a generalized function that could do this search for you. But it is actually more common to simply try to structure your data so that the forward references are the direction you usually want to go.
+Having both forward *and* back references is a more nefarious "duplication" of information. In this case the information is "which character is related to an item". Having a forward and back reference means you've *duplicated* the relationship, and as you've seen duplication of data (especially if it can be modified) is a terrible idea.
+
+So, generally if you need to find things "in reverse" (fortunately you rarely do), it's usually a matter of writing code that can search for it. For example, look through all character's inventories until you find `[:item/id 1]`. Fortunately, it isn't all that terribly hard to write a generalized function that could do this search. But in practice it is actually much more common to simply try to model your data so that the forward references are the direction you usually want to go.
+
+== De-normalization
+
+Sometimes you'll find that you actually want to "walk" the forward references and replace them with the real details of the entity. E.g. you want to see the details of all of the weapons that character 1 has in inventory. The process of turning our normalized data struture into a deeply nested value for convenience is actually quite useful. This process is called de-normalization, and the basic process is quite simple. Get the data of the first thing you want. Replace any references with the data that the reference points to.
+
+The main trick is that this process is recursive in nature. Say you want character Vlad. When you replace the sidekick reference with Vlad Jr. you suddenly have nested references to skills and inventory, etc.
+
+The actual algorithm for doing this is beyond your abilities at this point, so this section is mainly just here so that you've heard the term before, and know basically what it means:
+
+Go from this:
+
+[source]
+-----
+{:character/id {1 {:character/skills [[:skill/id 1]]}}
+ :skill/id {1 {:skill/id 1
+               :skill/type :archery
+               :skill/level 1}}}
+-----
+
+to "get me a denormalized view of character 1"
+
+[source]
+-----
+{:character/id 1
+ :character/skills [{:skill/id 1 :skill/type :archery :skill/level 1}]}
+-----
+
+In principle it's actually quite trivial.
