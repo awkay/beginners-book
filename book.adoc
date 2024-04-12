@@ -118,7 +118,7 @@ indeed 2 is greater than 1.
 
 There is a surprising complication that is common to many languages, though. Most programming languages have a set of rules (for convenience) for using other values in the program in place of the pure `true` or `false`. For example in C the number 0 is considered the same as false, but all other numbers are true.
 
-[source, c]
+[source,c]
 -----
 int i = 3;
 
@@ -880,7 +880,7 @@ Consider an example. Let's try to do the exact same thing in Java and Clojure ju
 and now the Java (note the use of Object, which is how you tell Java you want to be able to
 use "anything". Technically, this is about as close to a 1-to-1 comparison of the exact same operations.
 
-[source, java]
+[source,java]
 -----
 HashMap<Object, Object> person = new HashMap<Object,Object>();
 HashMap<Object, Object> addr = new HashMap<Object,Object>();
@@ -892,7 +892,7 @@ addr.put("address/street", "123 Main");
 
 However, if you were doing it the "right way", one might argue it would look like this (even this is shorter than what most Java programmers would write):
 
-[source, java]
+[source,java]
 -----
 class Person {
   public String name;
@@ -992,7 +992,7 @@ This means that there will, by simple necessity, be a difference between a "math
 
 For example, when programming in some languages you might see this seemingly puzzling thing:
 
-[source, java]
+[source,java]
 -----
 i = i + 1;
 -----
@@ -1012,7 +1012,7 @@ STORE the result back in i
 
 Now what about writing functions? Well, In some computer languages the mathematical notation is borrowed quite closely. For example in Haskell you could write the above math equation as:
 
-[source, haskell]
+[source,haskell]
 -----
 f x = 12 * x + 42
 -----
@@ -1053,7 +1053,7 @@ Any theories on how sets might behave? Give it a shot!
 
 In Javascript it would be:
 
-[source, javascript]
+[source,javascript]
 -----
 function f(x) {
   return 12 * x + 42;
@@ -1062,7 +1062,7 @@ function f(x) {
 
 and in Java/C/C++:
 
-[source, java]
+[source,java]
 -----
 double f(double x) {
     return 12 * x + 42;
@@ -1073,7 +1073,7 @@ notice that in this last version has to specifically declare that the function i
 
 These last two definitions also use the special word `return` in them. In these programming languages the code in a function must explicitly say when it is done and wants to send back a value. If the function "ends" without a return, then it is considered an error and the program will not work. Similarly, this is nonsensical:
 
-[source, c]
+[source,c]
 -----
 int f(int x) {
   return x;
@@ -1421,4 +1421,275 @@ In general, though, the approach to creating a program is to compose small bits 
 
 In either case you need to find tractable things to build. You can't possibly attack the entire problem at once except for trivial programs. It's all divide an conquer.
 
-== Classes and Objects
+= Data Modelling
+
+The basics of programming now boil down to just a few steps. In any given problem you can "take a picture" of what a given point in time might look like for your program. Some point in time is the *data* of your program. Constructing a *series* of these points in time is the purpose of *code*. So, take a simple function like we had in the exercises for computing points on some line:
+
+[source]
+-----
+(defn y [x] (+ (* 2 x) 10))
+-----
+
+when we give a single instruction `(y 5)`, the `5` is the only data we are carrying around. The instructions to do some math on it is code. There really isn't a time sequence in this case (unless you consider the temporary unnamed states the the computer goes through as it executes "multiply by 2" "add 10").
+
+More interesting programs have quite a bit more data than this. Let's say you're creating characters for a game. The objective is to capture as wide a view as possible for all of the possible things that character might need anywhere along the timeline of a game. For example, do they acquire objects/possessions? Do they have relationships to other characters?
+
+Some basic rules of how to assemble this data are:
+
+* Use a map to hold related key-value pairs.
+* If a value can have many members (e.g. inventory, skills, team mates), you'll *might* want any one of the possible collections:
+** Set: Use a set when the values must not be duplicated, or if it is important to detect the presence of a value.
+** Map: Similar to a set (since keys are unique), but in this case you need a nested for each unique thing.
+** Vector: In cases where you want to establish a stable order, or might have duplicates.
+
+So a first draft of a character might look like:
+
+[source]
+-----
+{:character/name "Vlad"
+ :character/skills #{ {:skill/type :archery :skill/level 1}
+                      {:skill/type :stealth :skill/level 4}}
+ :character/inventory [{:weapon/type :sword} {:weapon/type :sword} {:weapon/type :dagger} {:armor/type :plate}]
+ :character/sidekick {:character/name "Vlad Jr."
+                      :character/inventory [{:weapon/type :pointy-stick} {:armor/type :eye-patch]}}
+-----
+
+and so on. As you work on the data, you'll find that certain initial choices do not work well for some reason. This is very common, and it is a good idea to think about how the data will be used:
+
+* Does an element change over time? Is your choice for it easy and efficient to access and modify?
+* Might the element appear in more than one place at a time?
+** Consider a deduplication strategy, especially if it changes over time.
+
+Let's pick apart some problems with our first draft with these in mind.
+
+== Changes over Time
+
+When some element changes over time, it can be really inconvenient to update it if it has to be searched for with some kind of algorithm. For example, let's say our character is going to level up in archery. There's no clean "path" to that skill. It's a thing in a set, which means to change it we would have to first remove the old thing from the set, and then put the new thing back into the set.  But in order to remove it we first have to find it. Quite a lot of work.
+
+Most likely, we'll want to access skills by their skill type, so perhaps this would be better:
+
+[source]
+-----
+{:character/skills {:archery {:skill/type :archery
+                              :skill/level 1}
+                    :stealth {:skill/type :stealh
+                              :skill/level 4}}}
+-----
+
+Notice two things:
+
+. Skill levels now have a clear path, so raising archery's level is just `(update-in character [:character/skills :archery :skill/level] inc)`.
+. We still put the skill type in the skill map. This is just a good practice, because at some point you'll probably want to display a skill, and
+it will pay to be able to write a function that can just accept the particular skill as a map.
+
+[source]
+-----
+(defn show-skill [skill] ...)
+-----
+
+When we look at inventory, perhaps we'd just it to be OK. What you are carrying is typically just a bunch of stuff, and you might have duplicate items. However, note that another possible way to set up inventory would be by the category, type, and then a map of details. For example:
+
+[source]
+-----
+{:character/inventory {:weapons {:sword {:item/count 2}
+                                 :dagger {:item/count 1}
+                       :armor   {:plate {:item/count 1}}}}
+-----
+
+now think about how these things might evolve over time. Can a sword break? Can it get dull? Can armor get damaged? I think the answer to all of these is probably "yes", then this is not an improvement. There's no way, in this particular scheme, so easily say *which* sword is dull. Each item actually needs it's own map, because items may change individually in the world. Folding them into something with a count, in this case, is a bad idea.
+
+But this points out another problem with the original draft. How can I tell the two swords apart??? If I just find the first one in the inventory, and say "OK, you're duller now", I'm choosing one at random. Perhaps it's the wrong one? How would I know.
+
+In the real world you'd get out your handy label printer and name your item, right? Or stamp it with some serial number. We need some kind of identity to keep track of which is which.
+
+== Identity
+
+So, as we're building our data, we've now run into the problem of needing to clearly identify one thing from another. At a glance we might see our character map and think "Oh, that's Vlad", because we see their name.  In the real world the identity of a thing can seem pretty concrete, but what happens when Vlad decides to transition to be Susan?  It's still the same character, but some of its attributes have changed.
+
+The problem of keeping track of distinct individual things when any arbitrary single thing about them might change is a problem we deal with every day. Its why you have an ID number on your ID card. It's why credit cards have long numbers on them, etc.  The easiest way to keep track of something is to assign it an ID that has *nothing at all* to do with the data it is identifying. That way there's never any need to change it. An ID that is unique at least for a given *kind* of thing (character, weapon, armor) makes it much easier to deal with a number of issues.
+
+Note that the ID need not be globally unique. We could have weapon with ID 1, armor with ID 1, and even a character with ID 1. A globally unique ID *can* be set up and used, and it has only one real advantage: A globally unique ID can be used to find any *kind* of thing. The downside of that, though, is that if you have the ID, you have *no idea* about what it is the ID of until you look it up.
+
+So, generally when representing the data in our programs we will only try to ensure that IDs are unique for each different *kind* of information. We'll have more to say on this in a bit.
+
+For now, let's see if we can think of more ways to lay out our inventory so that:
+
+* We can have more than one of the same *kind* of thing
+* Each individual item has a distinct identity, so it can evolve independently
+* We can update a given item via a path we can imagine knowing
+
+What if we just start by given each inventory item a type and an ID:
+
+[source]
+-----
+{:item/id 1
+ :item/type :weapon
+ :item/name "Sword of Destiny"
+ :weapon/damage 2
+ :weapon/condition :sharp}
+-----
+
+so here we've chosen to also leverage the "namespace" of the keywords to accomplish another goal: Sometimes we just want to know what is in inventory in general. So, the `:item/...` keys can be used for anything, like `:item/type :coin` or `:item/type :armor`. Once we know it is a weapon, then we can look for weapon-specific facts about the item.
+
+Now, if we know a character is carrying item with ID 1, and they just spent a few minutes banging it against a rock, and it looks to be an edged weapon, then we'll want to modify the condition it is in.
+
+Perhaps we create a map for inventory, and KEY it by the ID of each item:
+
+[source]
+-----
+{:character/id 1
+ :character/name "Sally"
+ :character/inventory {1 {:item/id 1 ...}}}
+-----
+
+now modifying the condition of "item 1" is just something like an `(assoc-in character [:character/inventory 1 :weapon/condition] :dull)`. Of course the logic of the program would somehow have to figure out that the item is a weapon, but since you know where it is, it's easy enough to pull the data and look at all the attributes.
+
+This is a big improvement, but there's another case to consider.  With inventory, the character "owns" the item. That is to say the item should not appear in anyone else's inventory. But what about sidekicks?
+
+If we followed what we know so far, we might have a draft of our character that looks like this:
+
+[source]
+-----
+{:character/id   1
+ :character/name "Sally"
+ :character/skills  {:archery {:skill/type :archery
+                               :skill/level 1}
+                     :stealth {:skill/type :stealh
+                               :skill/level 4}}
+ :character/inventory  {1 {:item/id 1
+                           :item/type :weapon
+                           :item/name "Sword of Destiny"
+                           :weapon/damage 2
+                           :weapon/condition :sharp}}
+ :character/sidekick {:character/id 2
+                      :character/name "Vlad Jr."
+                      :character/inventory {1 {:item/id 2
+                                               :item/type :pointy-stick
+                                               :item/name "Eye Gouger"
+                                               :weapon/damage 1
+                                               :weapon/condition :pointy}}}}
+-----
+
+and now we have another problem. The sidekick is *not* really a thing that is owned by the character. Nesting it this way will cause us all sorts of problems! What if we want to break the pointy stick? It isn't at the same kind of path as Vlad's inventory...we have to know to flow down the sidekick path! This is clearly a nightmare in the making, because programs with *any* complexity will certainly run into this case.
+
+Not only is the path to the data bad, it's also possible that some *other* character will have "Vlad Jr." as a friend:
+
+[source]
+-----
+{:character/id 42
+ :character/name "Doug Adams"
+ :character/friends [{:character/id 2 :character/name "Vlad Jr." ...} ...]}
+-----
+
+Now we not only have a "path" problem, we also have a "duplication" one. Which of these is the real "Vlad Jr."?
+
+How do we solve this in the real world? Well, aside from cloning, we refer to the various things in life by their name or ID. So, what if we just make a "master lookup" table for all of our characters, and then when they need to refer to each other we'll just put their ID there?
+
+[source]
+-----
+{1 {:character/id   1
+    :character/name "Sally"
+    :character/skills  {:archery {:skill/type :archery
+                                  :skill/level 1}
+                        :stealth {:skill/type :stealh
+                                  :skill/level 4}}
+    :character/inventory  {1 {:item/id 1
+                              :item/type :weapon
+                              :item/name "Sword of Destiny"
+                              :weapon/damage 2
+                              :weapon/condition :sharp}}
+    :character/sidekick 2} ; 2 points to Vlad Jr.
+
+ 2 {:character/id 2
+    :character/name "Vlad Jr."
+    :character/inventory {2 {:item/id 2
+                             :item/type :pointy-stick
+                             :item/name "Eye Gouger"
+                             :weapon/damage 1
+                             :weapon/condition :pointy}}}
+ 42 {:character/id 42
+     :character/name "Doug Adams"
+     :character/friends [2]}} ; 2 points to Vlad Jr.
+-----
+
+This process of de-duplicating data by using references is known as *normalization* of the data. There's a whole branch of computer science dedicated to the study of it in the context of databases, but the core thing that you need to understand is this idea of replacing a thing with a reference to that thing.
+
+Now, we have one more problem to solve: we often do not use unique IDs. In our example so far we've been reusing numbers when the "type" of the thing in question is different. So, our references in the above draft are a bit *ambiguous*. We can kind of figure it out by looking at the key (e.g. we humans can guess that `:character/friends` probably points to other characters, but that isn't going to be obvious to everyone, and it certainly won't help the computer).
+
+So, we have one final leap to make: What if a reference is just a vector of the `[ID-key ID]`. Like `[:character/id 1]`. If we choose that as a convention, we would evolve things to this:
+
+[source]
+-----
+{1 {:character/id   1
+    :character/name "Sally"
+    :character/skills  {:archery {:skill/type :archery
+                                  :skill/level 1}
+                        :stealth {:skill/type :stealh
+                                  :skill/level 4}}
+    :character/inventory  {1 {:item/id 1
+                              :item/type :weapon
+                              :item/name "Sword of Destiny"
+                              :weapon/damage 2
+                              :weapon/condition :sharp}}
+    :character/sidekick [:character/id 2]} ; clearly points to Vlad Jr.
+
+ 2 {:character/id 2
+    :character/name "Vlad Jr."
+    :character/inventory {2 {:item/id 2
+                             :item/type :pointy-stick
+                             :item/name "Eye Gouger"
+                             :weapon/damage 1
+                             :weapon/condition :pointy}}}
+ 42 {:character/id 42
+     :character/name "Doug Adams"
+     :character/friends [[:character/id 2]]}} ; 2 points to Vlad Jr. Notice we have a vector of references
+-----
+
+ok, so now you might notice something. This proposed reference format is *exactly* what we use with `assoc-in` and `get-in` as a path to data. This sort of implies that it might be nice to organize our characters like this:
+
+[source]
+-----
+{:character/id  {1  {:character/id 1
+                     :character/name "Vlad"
+                     ...
+                     :character/sidekick [:character/id 2]}
+                 2  {:character/id 2
+                     :character/name "Vlad Jr."
+                     ...}
+                 42 {:character/id 42
+                     :character/friends [[:character/id 2]]
+                     :character/name "Doug Adams"}}}
+-----
+
+because now if I know the reference(s), I can just look them up against the top-level character map with `get-in`. Want to make a modification to a character, it's just something like an `(assoc-in characters [:character/id ID :character/name] "Sally")`. The paths are now "relatively" shallow for any update we can think of.
+
+Now look at all the other nested data like skills and inventory. This same trick can be played there!
+
+[source]
+-----
+{:character/id  {1  {:character/id 1
+                     :character/name "Vlad"
+                     :character/skills [[:skill/id 1] [:skill/id 2]]
+                     :character/inventory [[:item/id 1] [:item/id 2]]
+                     ...
+                     :character/sidekick [:character/id 2]}
+                 2  {:character/id 2
+                     :character/name "Vlad Jr."
+                     ...}
+                 42 {:character/id 42
+                     :character/friends [[:character/id 2]]
+                     :character/name "Doug Adams"}}
+ :skill/id    {1 {:skill/id 1 :skill/type :archery :skill/level 1}
+               2 {:skill/id 2 :skill/type :stealth :skill/level 4}
+               ...}
+ :item/id     {1 {:item/id 1 ...}
+               2 {:item/id 2 ...}}}
+-----
+
+Now if we want to know the value of any kind of thing, it is just generally `(get-in data [id-key id])`. If we want to change some attribute it's either an `assoc-in` or `update-in` along a similar path: `(assoc-in data [id-key id attribute-key] new-value)`.
+
+So, this seems an overall good generalization for how to represent arbitrarily complex nested data!
+
+QUIZ::
+Say we wanted to add a new skill (say `:skill/type :charm`) to Vlad. What sequence of steps would you do (abstractly and/or in code)?
+
