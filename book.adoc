@@ -1693,3 +1693,67 @@ So, this seems an overall good generalization for how to represent arbitrarily c
 QUIZ::
 Say we wanted to add a new skill (say `:skill/type :charm`) to Vlad. What sequence of steps would you do (abstractly and/or in code)?
 
+Now notice another thing: Once everything has a unique way of referring to it, we can now easily create other derived things as we need them. Let's say your game has the concept of "raiding party", where you need to keep track of who is in the party. You might add a field like this:
+
+[source]
+-----
+{:raiding-party [[:character/id 1] [:character/id 2]]
+ ...}
+-----
+
+and now you're tracking a list of characters for a new purpose! Perhaps the raiding party goes with some scenario, and you need to keep track of which scenario you're working on:
+
+[source]
+-----
+{:current-scenario [:scenario/id 1]
+ :scenario/id  {1 {:scenario/raiding-party [[:character/id 1] [:character/id 2]]}}}
+-----
+
+but now you think "Hey, my raiding party needs a name"...well, turn it into a new entity with an ID!
+
+[source]
+-----
+{:current-scenario [:scenario/id 1]
+ :scenario/id  {1 {:scenario/raiding-party [:party/id 1]}}
+ :party/id     {1 {:party/name "The Raiders"
+                   :party/members [[:character/id 1] [:character/id 2]]}}
+ :character/id {1 ...}
+ :skill/id ...
+ ...}
+-----
+
+you can go on like this all day! The beauty of references is that:
+
+* You never end up with a deeply nested data structure.
+* You don't have duplicated facts peppered all over the place
+
+Of course nothing is perfect. The main problem with this structure is that there it isn't easy to answer the question "whose skill is this?" or "who has item 6 in their inventory". Fortunately, in most programs there is a clear directionality of data (e.g. in our game we're probably mostly working directly with the characters, and walking forward from there through the references).
+
+However, there's nothing to say that you can't create a "back-reference". In other words, a reference that points to the "owner" of something. For example: `{:item/owner [:character/id 4]}`.
+
+QUIZ::
+Before reading on, try to name a problem with having back references.
+
+To see why this isn't commonly done, let's see the data evolve over time. Say at one point in the game Vlad aka Sally has the Sword of Destiny, which
+has a back-reference:
+
+[source]
+-----
+{:character/id {1 {:character/inventory [[:item/id 1] ...]}}
+ :item/id {1 {:item/name "Sword of Destiny"
+              :item/owner [:character/id 1]}}
+-----
+
+and Vlad decides to give this sword to their sidekick. If the logic of the program isn't perfect, it could be easy to *forget* to update the back reference, leading to something inconsistent like this:
+
+[source]
+-----
+{:character/id {1 {:character/inventory [[:item/id 2] ...]}
+                2 {:character/inventory [[:item/id 1] ...]}
+ :item/id {1 {:item/name "Sword of Destiny"
+              :item/owner [:character/id 1]}}
+-----
+
+clearly character 2 now has item 1 in their inventory, but the item didn't get updated so if you were asking the question "who owns the Sword of Destiny" the program would likely use this back-reference and give the wrong answer!
+
+So, generally if you need to find things "in reverse" (fortunately you rarely do), it's usually a matter of writing code that can search for it. For example, look through all character's inventories until you find `[:item/id 1]`. Fortunately, it isn't all that terribly hard to write a generalized function that could do this search for you. But it is actually more common to simply try to structure your data so that the forward references are the direction you usually want to go.
