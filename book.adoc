@@ -1790,3 +1790,18 @@ to "get me a denormalized view of character 1"
 -----
 
 In principle it's actually quite trivial.
+
+== Review
+
+Our study of data representation has led us to some general conclusions:
+
+* When designing data for a program, a primary concern is to think about how that data will evolve over time.
+* Do our best not to duplicate data.
+** Give things a clear "identity". Possibilities include globally unique IDs, or at least some pair of "type/id", for example `[id-keyword id]`
+** Use the identity for "referencing" instead of repeating the information.
+* Represent the "state of the application" using maps that:
+** Have an ID (so we can generate references to them)
+** Are stored at their own "reference path". E.g. `[:character/id 1]` is stored at `{:character/id {1 {...}}}`
+** Have attributes the are distinctly named to give clear meaning to the data like `:item/name` and `:weapon/type`
+** Use references to refer to other entities, instead of embedding that data. E.g. `:character/sidekick [:character/id 2]`
+* An *entity* is just a term for a map of key-value pairs that has some distinct *identity* in the universe.
