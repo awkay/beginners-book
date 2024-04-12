@@ -576,7 +576,16 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <li><a href="#_reducing_a_sequence">1.7.3. Reducing a Sequence</a></li>
 </ul>
 </li>
-<li><a href="#_classes_and_objects">1.8. Classes and Objects</a></li>
+<li><a href="#_decomposing_problems">1.8. Decomposing Problems</a></li>
+</ul>
+</li>
+<li><a href="#_data_modelling">2. Data Modelling</a>
+<ul class="sectlevel2">
+<li><a href="#_changes_over_time">2.1. Changes over Time</a></li>
+<li><a href="#_identity">2.2. Identity</a></li>
+<li><a href="#_normalization">2.3. Normalization</a></li>
+<li><a href="#_de_normalization">2.4. De-normalization</a></li>
+<li><a href="#_review">2.5. Review</a></li>
 </ul>
 </li>
 </ul>
@@ -2637,15 +2646,579 @@ just adds an element to the end of a vector. For example,
 </div>
 </div>
 <div class="sect2">
-<h3 id="_classes_and_objects"><a class="anchor" href="#_classes_and_objects"></a><a class="link" href="#_classes_and_objects">1.8. Classes and Objects</a></h3>
+<h3 id="_decomposing_problems"><a class="anchor" href="#_decomposing_problems"></a><a class="link" href="#_decomposing_problems">1.8. Decomposing Problems</a></h3>
+<div class="paragraph">
+<p>Now that you&#8217;ve learned the basic data and structures you&#8217;re ready to start learning how to represent things in the real world. This is really the heart of programming with a language like Clojure: Decide what you need to represent, and how to organize that data for straightforward use.</p>
+</div>
+<div class="paragraph">
+<p>In my opinion, other languages which have a lot of syntax around this end up distracting you with the programming language <strong>itself</strong>. It can become hard to think about your problem because the data itself becomes overly complected with the notation of programming.</p>
+</div>
+<div class="paragraph">
+<p>In general, though, the approach to creating a program is to compose small bits together until you reach the solution, but you might actually find it useful to start that thinking from "one end or the other":</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If you understand the large problem, you will sometimes decompose it into smaller and smaller chunks until you find units that you can reason about at the level of simple data, or a simple function. Then you write those small bits and compose them into larger ones.</p>
+</li>
+<li>
+<p>If you&#8217;re exploring the space you might <strong>start</strong> with the small bits you understand already, and build on that until you reach your target.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In either case you need to find tractable things to build. You can&#8217;t possibly attack the entire problem at once except for trivial programs. It&#8217;s all divide an conquer.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_data_modelling"><a class="anchor" href="#_data_modelling"></a><a class="link" href="#_data_modelling">2. Data Modelling</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The basics of programming now boil down to just a few steps. In any given problem you can "take a picture" of what a given point in time might look like for your program. Some point in time is the <strong>data</strong> of your program. Constructing a <strong>series</strong> of these points in time is the purpose of <strong>code</strong>. So, take a simple function like we had in the exercises for computing points on some line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">y</span> [x] (<span class="keyword">+</span> (<span class="keyword">*</span> <span class="integer">2</span> x) <span class="integer">10</span>))</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>when we give a single instruction <code>(y 5)</code>, the <code>5</code> is the only data we are carrying around. The instructions to do some math on it is code. There really isn&#8217;t a time sequence in this case (unless you consider the temporary unnamed states the the computer goes through as it executes "multiply by 2" "add 10").</p>
+</div>
+<div class="paragraph">
+<p>More interesting programs have quite a bit more data than this. Let&#8217;s say you&#8217;re creating characters for a game. The objective is to capture as wide a view as possible for all of the possible things that character might need anywhere along the timeline of a game. For example, do they acquire objects/possessions? Do they have relationships to other characters?</p>
+</div>
+<div class="paragraph">
+<p>Some basic rules of how to assemble this data are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use a map to hold related key-value pairs.</p>
+</li>
+<li>
+<p>If a value can have many members (e.g. inventory, skills, team mates), you&#8217;ll <strong>might</strong> want any one of the possible collections:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Set: Use a set when the values must not be duplicated, or if it is important to detect the presence of a value.</p>
+</li>
+<li>
+<p>Map: Similar to a set (since keys are unique), but in this case you need a nested for each unique thing.</p>
+</li>
+<li>
+<p>Vector: In cases where you want to establish a stable order, or might have duplicates.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So a first draft of a character might look like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:character/skills</span> #{ {<span class="symbol">:skill/type</span> <span class="symbol">:archery</span> <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+                      {<span class="symbol">:skill/type</span> <span class="symbol">:stealth</span> <span class="symbol">:skill/level</span> <span class="integer">4</span>}}
+ <span class="symbol">:character/inventory</span> [{<span class="symbol">:weapon/type</span> <span class="symbol">:sword</span>} {<span class="symbol">:weapon/type</span> <span class="symbol">:sword</span>} {<span class="symbol">:weapon/type</span> <span class="symbol">:dagger</span>} {<span class="symbol">:armor/type</span> <span class="symbol">:plate</span>}]
+ <span class="symbol">:character/sidekick</span> {<span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+                      <span class="symbol">:character/inventory</span> [{<span class="symbol">:weapon/type</span> <span class="symbol">:pointy-stick</span>} {<span class="symbol">:armor/type</span> <span class="symbol">:eye-patch</span>]}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and so on. As you work on the data, you&#8217;ll find that certain initial choices do not work well for some reason. This is very common, and it is a good idea to think about how the data will be used:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Does an element change over time? Is your choice for it easy and efficient to access and modify?</p>
+</li>
+<li>
+<p>Might the element appear in more than one place at a time?</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Consider a deduplication strategy, especially if it changes over time.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s pick apart some problems with our first draft with these in mind.</p>
+</div>
+<div class="sect2">
+<h3 id="_changes_over_time"><a class="anchor" href="#_changes_over_time"></a><a class="link" href="#_changes_over_time">2.1. Changes over Time</a></h3>
+<div class="paragraph">
+<p>When some element changes over time, it can be really inconvenient to update it if it has to be searched for with some kind of algorithm. For example, let&#8217;s say our character is going to level up in archery. There&#8217;s no clean "path" to that skill. It&#8217;s a thing in a set, which means to change it we would have to first remove the old thing from the set, and then put the new thing back into the set.  But in order to remove it we first have to find it. Quite a lot of work.</p>
+</div>
+<div class="paragraph">
+<p>Most likely, we&#8217;ll want to access skills by their skill type, so perhaps this would be better:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/skills</span> {<span class="symbol">:archery</span> {<span class="symbol">:skill/type</span> <span class="symbol">:archery</span>
+                              <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+                    <span class="symbol">:stealth</span> {<span class="symbol">:skill/type</span> <span class="symbol">:stealh</span>
+                              <span class="symbol">:skill/level</span> <span class="integer">4</span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice two things:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Skill levels now have a clear path, so raising archery&#8217;s level is just <code>(update-in character [:character/skills :archery :skill/level] inc)</code>.</p>
+</li>
+<li>
+<p>We still put the skill type in the skill map. This is just a good practice, because at some point you&#8217;ll probably want to display a skill, and
+it will pay to be able to write a function that can just accept the particular skill as a map.</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">(<span class="keyword">defn</span> <span class="function">show-skill</span> [skill] <span class="keyword">..</span><span class="keyword">.</span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When we look at inventory, perhaps we&#8217;d just it to be OK. What you are carrying is typically just a bunch of stuff, and you might have duplicate items. However, note that another possible way to set up inventory would be by the category, type, and then a map of details. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/inventory</span> {<span class="symbol">:weapons</span> {<span class="symbol">:sword</span> {<span class="symbol">:item/count</span> <span class="integer">2</span>}
+                                 <span class="symbol">:dagger</span> {<span class="symbol">:item/count</span> <span class="integer">1</span>}
+                       <span class="symbol">:armor</span>   {<span class="symbol">:plate</span> {<span class="symbol">:item/count</span> <span class="integer">1</span>}}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>now think about how these things might evolve over time. Can a sword break? Can it get dull? Can armor get damaged? I think the answer to all of these is probably "yes", then this is not an improvement. There&#8217;s no way, in this particular scheme, so easily say <strong>which</strong> sword is dull. Each item actually needs it&#8217;s own map, because items may change individually in the world. Folding them into something with a count, in this case, is a bad idea.</p>
+</div>
+<div class="paragraph">
+<p>But this points out another problem with the original draft. How can I tell the two swords apart??? If I just find the first one in the inventory, and say "OK, you&#8217;re duller now", I&#8217;m choosing one at random. Perhaps it&#8217;s the wrong one? How would I know.</p>
+</div>
+<div class="paragraph">
+<p>In the real world you&#8217;d get out your handy label printer and name your item, right? Or stamp it with some serial number. We need some kind of identity to keep track of which is which.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_identity"><a class="anchor" href="#_identity"></a><a class="link" href="#_identity">2.2. Identity</a></h3>
+<div class="paragraph">
+<p>So, as we&#8217;re building our data, we&#8217;ve now run into the problem of needing to clearly identify one thing from another. At a glance we might see our character map and think "Oh, that&#8217;s Vlad", because we see their name.  In the real world the identity of a thing can seem pretty concrete, but what happens when Vlad decides to transition to be Susan?  It&#8217;s still the same character, but some of its attributes have changed.</p>
+</div>
+<div class="paragraph">
+<p>The problem of keeping track of distinct individual things when any arbitrary single thing about them might change is a problem we deal with every day. Its why you have an ID number on your ID card. It&#8217;s why credit cards have long numbers on them, etc.  The easiest way to keep track of something is to assign it an ID that has <strong>nothing at all</strong> to do with the data it is identifying. That way there&#8217;s never any need to change it. An ID that is unique at least for a given <strong>kind</strong> of thing (character, weapon, armor) makes it much easier to deal with a number of issues.</p>
+</div>
+<div class="paragraph">
+<p>Note that the ID need not be globally unique. We could have weapon with ID 1, armor with ID 1, and even a character with ID 1. A globally unique ID <strong>can</strong> be set up and used, and it has only one real advantage: A globally unique ID can be used to find any <strong>kind</strong> of thing. The downside of that, though, is that if you have the ID, you have <strong>no idea</strong> about what it is the ID of until you look it up.</p>
+</div>
+<div class="paragraph">
+<p>So, generally when representing the data in our programs we will only try to ensure that IDs are unique for each different <strong>kind</strong> of information. We&#8217;ll have more to say on this in a bit.</p>
+</div>
+<div class="paragraph">
+<p>For now, let&#8217;s see if we can think of more ways to lay out our inventory so that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We can have more than one of the same <strong>kind</strong> of thing</p>
+</li>
+<li>
+<p>Each individual item has a distinct identity, so it can evolve independently</p>
+</li>
+<li>
+<p>We can update a given item via a path we can imagine knowing</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>What if we just start by given each inventory item a type and an ID:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:item/id</span> <span class="integer">1</span>
+ <span class="symbol">:item/type</span> <span class="symbol">:weapon</span>
+ <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:weapon/damage</span> <span class="integer">2</span>
+ <span class="symbol">:weapon/condition</span> <span class="symbol">:sharp</span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>so here we&#8217;ve chosen to also leverage the "namespace" of the keywords to accomplish another goal: Sometimes we just want to know what is in inventory in general. So, the <code>:item/&#8230;&#8203;</code> keys can be used for anything, like <code>:item/type :coin</code> or <code>:item/type :armor</code>. Once we know it is a weapon, then we can look for weapon-specific facts about the item.</p>
+</div>
+<div class="paragraph">
+<p>Now, if we know a character is carrying item with ID 1, and they just spent a few minutes banging it against a rock, and it looks to be an edged weapon, then we&#8217;ll want to modify the condition it is in.</p>
+</div>
+<div class="paragraph">
+<p>Perhaps we create a map for inventory, and KEY it by the ID of each item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> <span class="integer">1</span>
+ <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sally</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:character/inventory</span> {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">1</span> <span class="keyword">..</span><span class="keyword">.</span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>now modifying the condition of "item 1" is just something like an <code>(assoc-in character [:character/inventory 1 :weapon/condition] :dull)</code>. Of course the logic of the program would somehow have to figure out that the item is a weapon, but since you know where it is, it&#8217;s easy enough to pull the data and look at all the attributes.</p>
+</div>
+<div class="paragraph">
+<p>This is a big improvement, but there&#8217;s another case to consider.  With inventory, the character "owns" the item. That is to say the item should not appear in anyone else&#8217;s inventory. But what about sidekicks?</p>
+</div>
+<div class="paragraph">
+<p>If we followed what we know so far, we might have a draft of our character that looks like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span>   <span class="integer">1</span>
+ <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sally</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:character/skills</span>  {<span class="symbol">:archery</span> {<span class="symbol">:skill/type</span> <span class="symbol">:archery</span>
+                               <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+                     <span class="symbol">:stealth</span> {<span class="symbol">:skill/type</span> <span class="symbol">:stealh</span>
+                               <span class="symbol">:skill/level</span> <span class="integer">4</span>}}
+ <span class="symbol">:character/inventory</span>  {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">1</span>
+                           <span class="symbol">:item/type</span> <span class="symbol">:weapon</span>
+                           <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+                           <span class="symbol">:weapon/damage</span> <span class="integer">2</span>
+                           <span class="symbol">:weapon/condition</span> <span class="symbol">:sharp</span>}}
+ <span class="symbol">:character/sidekick</span> {<span class="symbol">:character/id</span> <span class="integer">2</span>
+                      <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+                      <span class="symbol">:character/inventory</span> {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">2</span>
+                                               <span class="symbol">:item/type</span> <span class="symbol">:pointy-stick</span>
+                                               <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Eye Gouger</span><span class="delimiter">&quot;</span></span>
+                                               <span class="symbol">:weapon/damage</span> <span class="integer">1</span>
+                                               <span class="symbol">:weapon/condition</span> <span class="symbol">:pointy</span>}}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and now we have another problem. The sidekick is <strong>not</strong> really a thing that is owned by the character. Nesting it this way will cause us all sorts of problems! What if we want to break the pointy stick? It isn&#8217;t at the same kind of path as Vlad&#8217;s inventory&#8230;&#8203;we have to know to flow down the sidekick path! This is clearly a nightmare in the making, because programs with <strong>any</strong> complexity will certainly run into this case.</p>
+</div>
+<div class="paragraph">
+<p>Not only is the path to the data bad, it&#8217;s also possible that some <strong>other</strong> character will have "Vlad Jr." as a friend:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> <span class="integer">42</span>
+ <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Doug Adams</span><span class="delimiter">&quot;</span></span>
+ <span class="symbol">:character/friends</span> [{<span class="symbol">:character/id</span> <span class="integer">2</span> <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span> <span class="keyword">..</span><span class="keyword">.</span>} <span class="keyword">..</span><span class="keyword">.</span>]}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we not only have a "path" problem, we also have a "duplication" one. Which of these is the real "Vlad Jr."?</p>
+</div>
+<div class="paragraph">
+<p>How do we solve this in the real world? Well, aside from cloning, we refer to the various things in life by their name or ID. So, what if we just make a "master lookup" table for all of our characters, and then when they need to refer to each other we&#8217;ll just put their ID there?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="integer">1</span> {<span class="symbol">:character/id</span>   <span class="integer">1</span>
+    <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sally</span><span class="delimiter">&quot;</span></span>
+    <span class="symbol">:character/skills</span>  {<span class="symbol">:archery</span> {<span class="symbol">:skill/type</span> <span class="symbol">:archery</span>
+                                  <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+                        <span class="symbol">:stealth</span> {<span class="symbol">:skill/type</span> <span class="symbol">:stealh</span>
+                                  <span class="symbol">:skill/level</span> <span class="integer">4</span>}}
+    <span class="symbol">:character/inventory</span>  {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">1</span>
+                              <span class="symbol">:item/type</span> <span class="symbol">:weapon</span>
+                              <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+                              <span class="symbol">:weapon/damage</span> <span class="integer">2</span>
+                              <span class="symbol">:weapon/condition</span> <span class="symbol">:sharp</span>}}
+    <span class="symbol">:character/sidekick</span> <span class="integer">2</span>} <span class="comment">; 2 points to Vlad Jr.</span>
 
+ <span class="integer">2</span> {<span class="symbol">:character/id</span> <span class="integer">2</span>
+    <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+    <span class="symbol">:character/inventory</span> {<span class="integer">2</span> {<span class="symbol">:item/id</span> <span class="integer">2</span>
+                             <span class="symbol">:item/type</span> <span class="symbol">:pointy-stick</span>
+                             <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Eye Gouger</span><span class="delimiter">&quot;</span></span>
+                             <span class="symbol">:weapon/damage</span> <span class="integer">1</span>
+                             <span class="symbol">:weapon/condition</span> <span class="symbol">:pointy</span>}}}
+ <span class="integer">42</span> {<span class="symbol">:character/id</span> <span class="integer">42</span>
+     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Doug Adams</span><span class="delimiter">&quot;</span></span>
+     <span class="symbol">:character/friends</span> [<span class="integer">2</span>]}} <span class="comment">; 2 points to Vlad Jr.</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_normalization"><a class="anchor" href="#_normalization"></a><a class="link" href="#_normalization">2.3. Normalization</a></h3>
+<div class="paragraph">
+<p>This process of de-duplicating data by using references is known as <strong>normalization</strong> of the data. There&#8217;s a whole branch of computer science dedicated to the study of it in the context of databases, but the core thing that you need to understand is this idea of replacing a thing with a reference to that thing.</p>
+</div>
+<div class="paragraph">
+<p>Now, we have one more problem to solve: we often do not use unique IDs. In our example so far we&#8217;ve been reusing numbers when the "type" of the thing in question is different. So, our references in the above draft are a bit <strong>ambiguous</strong>. We can kind of figure it out by looking at the key (e.g. we humans can guess that <code>:character/friends</code> probably points to other characters, but that isn&#8217;t going to be obvious to everyone, and it certainly won&#8217;t help the computer).</p>
+</div>
+<div class="paragraph">
+<p>So, we have one final leap to make: What if we choose to make a reference as a vector of the <code>[ID-key ID]</code>.
+Like <code>[:character/id 1]</code>. If we do that, the result would evolve to this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="integer">1</span> {<span class="symbol">:character/id</span>   <span class="integer">1</span>
+    <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sally</span><span class="delimiter">&quot;</span></span>
+    <span class="symbol">:character/skills</span>  {<span class="symbol">:archery</span> {<span class="symbol">:skill/type</span> <span class="symbol">:archery</span>
+                                  <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+                        <span class="symbol">:stealth</span> {<span class="symbol">:skill/type</span> <span class="symbol">:stealh</span>
+                                  <span class="symbol">:skill/level</span> <span class="integer">4</span>}}
+    <span class="symbol">:character/inventory</span>  {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">1</span>
+                              <span class="symbol">:item/type</span> <span class="symbol">:weapon</span>
+                              <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+                              <span class="symbol">:weapon/damage</span> <span class="integer">2</span>
+                              <span class="symbol">:weapon/condition</span> <span class="symbol">:sharp</span>}}
+    <span class="symbol">:character/sidekick</span> [<span class="symbol">:character/id</span> <span class="integer">2</span>]} <span class="comment">; clearly points to Vlad Jr.</span>
+
+ <span class="integer">2</span> {<span class="symbol">:character/id</span> <span class="integer">2</span>
+    <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+    <span class="symbol">:character/inventory</span> {<span class="integer">2</span> {<span class="symbol">:item/id</span> <span class="integer">2</span>
+                             <span class="symbol">:item/type</span> <span class="symbol">:pointy-stick</span>
+                             <span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Eye Gouger</span><span class="delimiter">&quot;</span></span>
+                             <span class="symbol">:weapon/damage</span> <span class="integer">1</span>
+                             <span class="symbol">:weapon/condition</span> <span class="symbol">:pointy</span>}}}
+ <span class="integer">42</span> {<span class="symbol">:character/id</span> <span class="integer">42</span>
+     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Doug Adams</span><span class="delimiter">&quot;</span></span>
+     <span class="symbol">:character/friends</span> [[<span class="symbol">:character/id</span> <span class="integer">2</span>]]}} <span class="comment">; 2 points to Vlad Jr. Notice we have a vector of references</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>ok, so now you might notice something. This proposed reference format is <strong>exactly</strong> what we use with <code>assoc-in</code> and <code>get-in</code> as a path to data. This sort of implies that it might be nice to organize our characters like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span>  {<span class="integer">1</span>  {<span class="symbol">:character/id</span> <span class="integer">1</span>
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad</span><span class="delimiter">&quot;</span></span>
+                     <span class="keyword">..</span><span class="keyword">.</span>
+                     <span class="symbol">:character/sidekick</span> [<span class="symbol">:character/id</span> <span class="integer">2</span>]}
+                 <span class="integer">2</span>  {<span class="symbol">:character/id</span> <span class="integer">2</span>
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+                     <span class="keyword">..</span><span class="keyword">.</span>}
+                 <span class="integer">42</span> {<span class="symbol">:character/id</span> <span class="integer">42</span>
+                     <span class="symbol">:character/friends</span> [[<span class="symbol">:character/id</span> <span class="integer">2</span>]]
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Doug Adams</span><span class="delimiter">&quot;</span></span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>because now if I know the reference(s), I can just look them up against the top-level map with <code>get-in</code>! Want to make a modification to a character? It&#8217;s just something like an <code>(assoc-in m [:character/id ID :character/name] "Sally")</code>.  The paths are nice and short!</p>
+</div>
+<div class="paragraph">
+<p>Now look at all the other nested data like skills and inventory. This same trick can be played there!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span>  {<span class="integer">1</span>  {<span class="symbol">:character/id</span> <span class="integer">1</span>
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad</span><span class="delimiter">&quot;</span></span>
+                     <span class="symbol">:character/skills</span> [[<span class="symbol">:skill/id</span> <span class="integer">1</span>] [<span class="symbol">:skill/id</span> <span class="integer">2</span>]]
+                     <span class="symbol">:character/inventory</span> [[<span class="symbol">:item/id</span> <span class="integer">1</span>] [<span class="symbol">:item/id</span> <span class="integer">2</span>]]
+                     <span class="keyword">..</span><span class="keyword">.</span>
+                     <span class="symbol">:character/sidekick</span> [<span class="symbol">:character/id</span> <span class="integer">2</span>]}
+                 <span class="integer">2</span>  {<span class="symbol">:character/id</span> <span class="integer">2</span>
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Vlad Jr.</span><span class="delimiter">&quot;</span></span>
+                     <span class="keyword">..</span><span class="keyword">.</span>}
+                 <span class="integer">42</span> {<span class="symbol">:character/id</span> <span class="integer">42</span>
+                     <span class="symbol">:character/friends</span> [[<span class="symbol">:character/id</span> <span class="integer">2</span>]]
+                     <span class="symbol">:character/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Doug Adams</span><span class="delimiter">&quot;</span></span>}}
+ <span class="symbol">:skill/id</span>    {<span class="integer">1</span> {<span class="symbol">:skill/id</span> <span class="integer">1</span> <span class="symbol">:skill/type</span> <span class="symbol">:archery</span> <span class="symbol">:skill/level</span> <span class="integer">1</span>}
+               <span class="integer">2</span> {<span class="symbol">:skill/id</span> <span class="integer">2</span> <span class="symbol">:skill/type</span> <span class="symbol">:stealth</span> <span class="symbol">:skill/level</span> <span class="integer">4</span>}
+               <span class="keyword">..</span><span class="keyword">.</span>}
+ <span class="symbol">:item/id</span>     {<span class="integer">1</span> {<span class="symbol">:item/id</span> <span class="integer">1</span> <span class="keyword">..</span><span class="keyword">.</span>}
+               <span class="integer">2</span> {<span class="symbol">:item/id</span> <span class="integer">2</span> <span class="keyword">..</span><span class="keyword">.</span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now if we want to know any fact on an entity, it is just generally <code>(get-in data [id-key id attribute-key])</code>. If we want to change some attribute it&#8217;s either an <code>assoc-in</code> or <code>update-in</code> along a similar path: <code>(assoc-in data [id-key id attribute-key] new-value)</code>.</p>
+</div>
+<div class="paragraph">
+<p>So, this seems an overall good generalization for how to represent arbitrarily complex nested data!</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Say we wanted to add a new skill (say <code>:skill/type :charm</code>) to Vlad. What sequence of steps would you do (abstractly and/or in code)?</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Now notice another thing: Once everything has a unique way of referring to it, we can now easily create other derived things as we need them. Let&#8217;s say your game has the concept of "raiding party", where you need to keep track of who is in the party. You might add a field like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:raiding-party</span> [[<span class="symbol">:character/id</span> <span class="integer">1</span>] [<span class="symbol">:character/id</span> <span class="integer">2</span>]]
+ <span class="keyword">..</span><span class="keyword">.</span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and now you&#8217;re tracking a list of characters for a new purpose! Perhaps the raiding party goes with some scenario, and you need to keep track of which scenario you&#8217;re working on:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:current-scenario</span> [<span class="symbol">:scenario/id</span> <span class="integer">1</span>]
+ <span class="symbol">:scenario/id</span>  {<span class="integer">1</span> {<span class="symbol">:scenario/raiding-party</span> [[<span class="symbol">:character/id</span> <span class="integer">1</span>] [<span class="symbol">:character/id</span> <span class="integer">2</span>]]}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>but now you think "Hey, my raiding party needs a name"&#8230;&#8203;well, turn it into a new entity with an ID!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:current-scenario</span> [<span class="symbol">:scenario/id</span> <span class="integer">1</span>]
+ <span class="symbol">:scenario/id</span>  {<span class="integer">1</span> {<span class="symbol">:scenario/raiding-party</span> [<span class="symbol">:party/id</span> <span class="integer">1</span>]}}
+ <span class="symbol">:party/id</span>     {<span class="integer">1</span> {<span class="symbol">:party/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">The Raiders</span><span class="delimiter">&quot;</span></span>
+                   <span class="symbol">:party/members</span> [[<span class="symbol">:character/id</span> <span class="integer">1</span>] [<span class="symbol">:character/id</span> <span class="integer">2</span>]]}}
+ <span class="symbol">:character/id</span> {<span class="integer">1</span> <span class="keyword">..</span><span class="keyword">.</span>}
+ <span class="symbol">:skill/id</span> <span class="keyword">..</span><span class="keyword">.</span>
+ <span class="keyword">..</span><span class="keyword">.</span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>you can go on like this all day! The beauty of references is that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You never end up with a deeply nested data structure.</p>
+</li>
+<li>
+<p>You don&#8217;t have duplicated facts peppered all over the place</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Of course nothing is perfect. The main problem with this structure is that there it isn&#8217;t easy to answer the question "whose skill is this?" or "who has item 6 in their inventory". Fortunately, in most programs there is a clear directionality of data (e.g. in our game we&#8217;re probably mostly working directly with the characters, and walking forward from there through the references).</p>
+</div>
+<div class="paragraph">
+<p>However, there&#8217;s nothing to say that you can&#8217;t create a "back-reference". In other words, a reference that points to the "owner" of something. For example: <code>{:item/owner [:character/id 4]}</code>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">QUIZ</dt>
+<dd>
+<p>Before reading on, try to name a problem with <strong>having</strong> back references.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>To see why this isn&#8217;t commonly done, let&#8217;s see the data evolve over time. Say at one point in the game Vlad has the Sword of Destiny, which
+in turn has a back-reference back to Vlad:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> {<span class="integer">1</span> {<span class="symbol">:character/inventory</span> [[<span class="symbol">:item/id</span> <span class="integer">1</span>] <span class="keyword">..</span><span class="keyword">.</span>]}}
+ <span class="symbol">:item/id</span> {<span class="integer">1</span> {<span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+              <span class="symbol">:item/owner</span> [<span class="symbol">:character/id</span> <span class="integer">1</span>]}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When Vlad decides to give this sword to their sidekick, if the logic of the program isn&#8217;t perfect, it could be easy to <strong>forget</strong> to update the back reference, leading to something inconsistent like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> {<span class="integer">1</span> {<span class="symbol">:character/inventory</span> [[<span class="symbol">:item/id</span> <span class="integer">2</span>] <span class="keyword">..</span><span class="keyword">.</span>]}
+                <span class="integer">2</span> {<span class="symbol">:character/inventory</span> [[<span class="symbol">:item/id</span> <span class="integer">1</span>] <span class="keyword">..</span><span class="keyword">.</span>]}
+ <span class="symbol">:item/id</span> {<span class="integer">1</span> {<span class="symbol">:item/name</span> <span class="string"><span class="delimiter">&quot;</span><span class="content">Sword of Destiny</span><span class="delimiter">&quot;</span></span>
+              <span class="symbol">:item/owner</span> [<span class="symbol">:character/id</span> <span class="integer">1</span>]}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>clearly character 2 now has item 1 in their inventory, but the item didn&#8217;t get updated so if you were asking the question "who owns the Sword of Destiny" the program would likely use this back-reference and give the wrong answer!</p>
+</div>
+<div class="paragraph">
+<p>Having both forward <strong>and</strong> back references is a more nefarious "duplication" of information. In this case the information is "which character is related to an item". Having a forward and back reference means you&#8217;ve <strong>duplicated</strong> the relationship, and as you&#8217;ve seen duplication of data (especially if it can be modified) is a terrible idea.</p>
+</div>
+<div class="paragraph">
+<p>So, generally if you need to find things "in reverse" (fortunately you rarely do), it&#8217;s usually a matter of writing code that can search for it. For example, look through all character&#8217;s inventories until you find <code>[:item/id 1]</code>. Fortunately, it isn&#8217;t all that terribly hard to write a generalized function that could do this search. But in practice it is actually much more common to simply try to model your data so that the forward references are the direction you usually want to go.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_de_normalization"><a class="anchor" href="#_de_normalization"></a><a class="link" href="#_de_normalization">2.4. De-normalization</a></h3>
+<div class="paragraph">
+<p>Sometimes you&#8217;ll find that you actually want to "walk" the forward references and replace them with the real details of the entity. E.g. you want to see the details of all of the weapons that character 1 has in inventory. The process of turning our normalized data struture into a deeply nested value for convenience is actually quite useful. This process is called de-normalization, and the basic process is quite simple. Get the data of the first thing you want. Replace any references with the data that the reference points to.</p>
+</div>
+<div class="paragraph">
+<p>The main trick is that this process is recursive in nature. Say you want character Vlad. When you replace the sidekick reference with Vlad Jr. you suddenly have nested references to skills and inventory, etc.</p>
+</div>
+<div class="paragraph">
+<p>The actual algorithm for doing this is beyond your abilities at this point, so this section is mainly just here so that you&#8217;ve heard the term before, and know basically what it means:</p>
+</div>
+<div class="paragraph">
+<p>Go from this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> {<span class="integer">1</span> {<span class="symbol">:character/skills</span> [[<span class="symbol">:skill/id</span> <span class="integer">1</span>]]}}
+ <span class="symbol">:skill/id</span> {<span class="integer">1</span> {<span class="symbol">:skill/id</span> <span class="integer">1</span>
+               <span class="symbol">:skill/type</span> <span class="symbol">:archery</span>
+               <span class="symbol">:skill/level</span> <span class="integer">1</span>}}}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to "get me a denormalized view of character 1"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="clojure">{<span class="symbol">:character/id</span> <span class="integer">1</span>
+ <span class="symbol">:character/skills</span> [{<span class="symbol">:skill/id</span> <span class="integer">1</span> <span class="symbol">:skill/type</span> <span class="symbol">:archery</span> <span class="symbol">:skill/level</span> <span class="integer">1</span>}]}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In principle it&#8217;s actually quite trivial.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_review"><a class="anchor" href="#_review"></a><a class="link" href="#_review">2.5. Review</a></h3>
+<div class="paragraph">
+<p>Our study of data representation has led us to some general conclusions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>When designing data for a program, a primary concern is to think about how that data will evolve over time.</p>
+</li>
+<li>
+<p>Do our best not to duplicate data.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Give things a clear "identity". Possibilities include globally unique IDs, or at least some pair of "type/id", for example <code>[id-keyword id]</code></p>
+</li>
+<li>
+<p>Use the identity for "referencing" instead of repeating the information.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Represent the "state of the application" using maps that:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Have an ID (so we can generate references to them)</p>
+</li>
+<li>
+<p>Are stored at their own "reference path". E.g. <code>[:character/id 1]</code> is stored at <code>{:character/id {1 {&#8230;&#8203;}}}</code></p>
+</li>
+<li>
+<p>Have attributes the are distinctly named to give clear meaning to the data like <code>:item/name</code> and <code>:weapon/type</code></p>
+</li>
+<li>
+<p>Use references to refer to other entities, instead of embedding that data. E.g. <code>:character/sidekick [:character/id 2]</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>An <strong>entity</strong> is just a term for a map of key-value pairs that has some distinct <strong>identity</strong> in the universe.</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-29 13:33:58 -0700
+Last updated 2024-04-11 23:43:23 -0700
 </div>
 </div>
 <script type="text/x-mathjax-config">
