@@ -1439,8 +1439,9 @@ Some basic rules of how to assemble this data are:
 * Use a map to hold related key-value pairs.
 * If a value can have many members (e.g. inventory, skills, team mates), you'll *might* want any one of the possible collections:
 ** Set: Use a set when the values must not be duplicated, or if it is important to detect the presence of a value.
-** Map: Similar to a set (since keys are unique), but in this case you need a nested for each unique thing.
-** Vector: In cases where you want to establish a stable order, or might have duplicates.
+** Map: Similar to a set (since keys are unique), but in this case you need an alternate value for each unique thing.
+** Vector: In cases where you want to establish a stable order, or specifically want to have duplicates.
+** List: Very efficient "head" operations (linked list). Useful for certain algorithms where linear construction and access are the norm.
 
 So a first draft of a character might look like:
 
@@ -1805,3 +1806,90 @@ Our study of data representation has led us to some general conclusions:
 ** Have attributes the are distinctly named to give clear meaning to the data like `:item/name` and `:weapon/type`
 ** Use references to refer to other entities, instead of embedding that data. E.g. `:character/sidekick [:character/id 2]`
 * An *entity* is just a term for a map of key-value pairs that has some distinct *identity* in the universe.
+
+= Application State as a Database
+
+The above data modelling assumes a very big thing: That you are willing to treat your entire application's data as a single,
+global database. Most modern idiomatic programming does not do things this way. Most programs create sort of a grey area of
+"data that is in memory" which is a mix of data that came from a "Real Database", and data that the program is keeping track of
+for component-local purposes.  This is obviously a valid and more popular way of structuring programs, and grew out of
+mistakes from the past.
+
+Older languages like Cobol and C made everything global. It was actually difficult to make something "private" in the sense that
+it could not be modified unintentionally. In fact, collisions were common and the source of many problematic bugs. If you look
+at any C program that uses libraries, you'll see that programmers go to great lengths to avoid collisions by trying to use unique
+naming. For example, see this page from https://www.openssl.org/docs/man1.0.2/man3/SSL_set_session.html[OpenSSL in C].
+Programmers often get lazy (is that even a good enough name to avoid collision?), and things go south quickly.
+
+Global data in programs, as variables, is universally accepted as a code smell. We're taught that the only things you should make truly
+global are immutable constants. The evolution from C to C++ exposed the world to some new ideas around this: namespaces,
+classes with private data, etc.
+
+The core idea here was that you could construct new types (via classes) which localized their data, and had
+distinct operations (which also belonged to the class).
+
+So, you were intended to make things that behaved like new built-in types (like int), and then construct
+your programs from collections of these. But note that we just pushed the problem off "by one". We still have to
+have *someplace* to store the instances of these new types in memory!
+
+So then we're led to make new classes, which don't really actually act like new types, but whose purpose is for containing
+groups of things related to a task. For example, PayrollModule, which has instances of Employee, etc.
+
+In the ultimate final case, there is no global data. Everything is on the "heap", and there are just a few local variables
+(stored on the stack) that refer to these large containers of containers of containers.
+
+So, one problem to solve was "how do I avoid collisions on global data?", and the solution we got was
+"hide everything so it is impossible".
+
+But now what happens? You we have a whole new set of problems:
+
+* Access/Lookup
+** What if I actually need to get to a particular bit of data in this model?
+** Leads to Singletons whose job is to find/make things.
+
+* Uniqueness and Identity
+** Even though I've "hidden" implementation and data, I can still reference the same thing from many places.
+** It is possible to make many "instances" of a thing.
+*** How do I know I've got the only one in memory?
+*** Does it matter?
+
+* Mutable by Default
+** If I modify mine, who else's gets modified? (mutable data)
+** I have no guarantee that when I call a function side effects don't somehow change internal state unpredictably
+
+* Incidental Complexity
+** Artifacts like classes are written when functions would be better.
+** Many times you just need a "bag of data". Having to write new code to hold this is a pain.
+*** Typed maps in Java are too specific and cumbersome.
+*** Javascript JSON is too weak (only supports strings and numbers).
+
+* Testing difficulties
+** Harder to construct things "in isolation" because they end up depending on so many things at once.
+
+So, we basically combined our overall need for a clean data model with a bunch of programming artifacts that
+were actually aimed at solving a different problem of older languages. This had some
+good effects, but we ignored the problems! We've now made the data modelling in our applications something that
+is tied to the specific syntactic constructs of the programming language! Things that were really meant for dealing
+with truly hidden and local problems (how we store the characters of an array) became the de-facto method of storing
+data that we actually *do* care about more globally!  Does a person's name really need to be a specially-protected
+member of a class with getters and setters?  In the vast majority of cases the answer to this is a firm "no".
+
+The ironic thing is that we've known for a very long time how to store data in a way that is unambiguous. We do it every
+day with petabytes of data across the world: Databases.  The data in databases might have specific access rules that
+are a business concern, but security is a separate (configurable) concern on top of the data. The data itself is
+just pure values. The "collision" problem is handled by naming (tables, columns) and identity (unique ids). This
+is well known to be quite scalable and simple.
+
+So, how does Clojure go about solving this? Well, by breaking apart the issues:
+
+* Naming collisions are better handled by namespaces, with the java convention of reverse domain names in libraries.
+* Immutable data prevents the "modification at a distance" problem, since you can't modify most things.
+
+
+
+
+= Decomposition and Data
+
+= Immutable Data over Time
+
+The next topic of interest is how we might deal with this data representation over time. Complex

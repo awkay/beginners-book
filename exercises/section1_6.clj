@@ -1,6 +1,8 @@
 (ns section1_6
   "Making Things Happen."
-  (:require [clojure.string :as str]))
+  (:require
+    [clojure.math :as math]
+    [clojure.string :as str]))
 
 ;; EXERCISE: Look up the formula for converting from Fahrenheit to Celcius. Write a function that takes F as input, and outputs the temp in C.
 ;; be sure to test it on some values that you know the answer for, like boiling point and freezing. Name the function `f-to-c`
@@ -148,13 +150,13 @@
 (calculate2 (constantly true) identity)
 
 
-;; There is a built-in thing called Math which has a number of useful math functions. For example, to get the
+;; There is a math namespace which has a number of useful functions. For example, to get the
 ;; square root of a number you would write:
-(Math/sqrt 6)
+(math/sqrt 6)
 
 ;; and to round a number:
-(Math/round 6.2)
-(Math/round 6.8)
+(math/round 6.2)
+(math/round 6.8)
 
 ;; EXERCISE: Write a Clojure function that find the length of a hypotenuse of a right triangle: hypot(x, y) = sqroot ( x * x + y * y )
 
@@ -162,7 +164,7 @@
 ;; The following function will calculate the x coordinate (really we'd have +x and -x) for a circle, given a y coordinate
 (defn circle-x [radius y]
   (when (<= (- radius) y radius)
-    (let [x (Math/sqrt
+    (let [x (math/sqrt
               (-
                 (* radius radius)
                 (* y y)))]
@@ -182,7 +184,7 @@
 ;; We'll also "round" the numbers, since the columns of our screen are integers (0 1 2 3, etc).
 (doseq [y [-3 -2 -1 0 1 2 3]]
   (let [radius       3
-        x            (Math/round (circle-x radius y))       ; plus x
+        x            (math/round (circle-x radius y))       ; plus x
         neg-x        (- x)                                  ; The minus of x
         x-offset     10                                     ; Some space to shift the "plot" to the right
         ;; The `repeat` function returns a sequence of the same thing over and over...we'll use that to make
@@ -209,5 +211,3 @@
 ;; the `x-offset`, and the desired `radius`. Remember to fix your range!
 ;; Test out your new `draw-circle` function to see that you can draw various
 ;; sized circles and shift them left or right!
-
-
